@@ -1,0 +1,9 @@
+# Ignorar documentações internas de planejamento/especificação
+docs/superpowers/
+
+# Ambiente e build
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
