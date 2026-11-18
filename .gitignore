@@ -1,9 +1,9 @@
-# Ignorar documentações internas de planejamento/especificação
-docs/superpowers/
-
-# Ambiente e build
 node_modules/
 dist/
+dev-dist/
 .env
 .env.*
 !.env.example
+*.tsbuildinfo
+playwright-report/
+test-results/
