@@ -1,0 +1,5 @@
+.modalContent { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.errorText { color: var(--app-color-danger); font-size: 1rem; line-height: 1.6; font-weight: 700; text-align: center; }
+.fieldText { color: var(--app-color-muted); font-size: .875rem; align-self: flex-start; }
+.closeButton { composes: button from '../button/style.module.css'; }
+.closeButtonText { font: inherit; }
