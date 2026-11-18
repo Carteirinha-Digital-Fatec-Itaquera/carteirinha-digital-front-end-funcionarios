@@ -49,7 +49,7 @@ export default function useUnreadRequests() {
     let pending = false;
     const refresh = async () => {
       if (pending || document.visibilityState === "hidden") return;
-      const token = localStorage.getItem(sessionKey);
+      const token = sessionStorage.getItem(sessionKey);
       if (!token) {
         setCount(null);
         return;
@@ -59,7 +59,7 @@ export default function useUnreadRequests() {
       try {
         const value = await countUnreadRequests(controller.signal);
         if (active)
-          setCount(token === localStorage.getItem(sessionKey) ? value : null);
+          setCount(token === sessionStorage.getItem(sessionKey) ? value : null);
       } catch {
         if (active) setCount(null); // Unknown is not zero; never show a stale count.
       } finally {

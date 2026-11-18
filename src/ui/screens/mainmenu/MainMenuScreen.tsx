@@ -43,6 +43,7 @@ export default function MainMenuScreen() {
           <PhotoStatus key={status ?? 'unknown'} status={status}
             availability={photo.loading ? 'loading' : photo.error ? 'unavailable' : 'ready'} />
 
+          {profile.error && <p role="alert">{profile.error}</p>}
           <div className={styles.gridContainer}>
 
             <button className={`${styles.menuCard} ${styles.fullWidth}`} onClick={() => navigate("/carteirinha")}>

@@ -95,7 +95,7 @@ export default function SupportScreen() {
     proposedValue: "",
   });
   const [showNew, setShowNew] = useState(false);
-  const createKey = useRef(crypto.randomUUID());
+  const createKey = useRef<{ payload: string; id: string } | null>(null);
   const actionKey = useRef<{ payload: string; id: string } | null>(null);
   const epoch = useRef(0);
   const load = useCallback(
@@ -165,8 +165,7 @@ export default function SupportScreen() {
     setBusy(true);
     setError("");
     try {
-      const value = await request<Ticket>("", {
-        requestId: createKey.current,
+      const body = {
         category: form.category,
         subject: form.subject,
         description: form.description,
@@ -178,8 +177,11 @@ export default function SupportScreen() {
                 : {}),
             }
           : {}),
-      });
-      createKey.current = crypto.randomUUID();
+      };
+      const payload = JSON.stringify(body);
+      if (createKey.current?.payload !== payload) createKey.current = { payload, id: crypto.randomUUID() };
+      const value = await request<Ticket>("", { ...body, requestId: createKey.current.id });
+      createKey.current = null;
       setCreated(value);
       setShowNew(false);
       setForm({
@@ -191,7 +193,8 @@ export default function SupportScreen() {
       });
       navigate("/suporte/" + value.id);
     } catch (e) {
-      setError(e instanceof ApiError && e.status === 409 ? "Atualize os dados e tente novamente." : e instanceof Error ? e.message : "Falha ao abrir solicitação.");
+      if (e instanceof ApiError && e.status === 409) await load();
+      setError(e instanceof Error ? e.message : "Falha ao abrir solicitação.");
     } finally {
       submitting.current = false;
       setBusy(false);
@@ -225,6 +228,7 @@ export default function SupportScreen() {
       }
       await load();
     } catch (e) {
+      if (e instanceof ApiError && e.status === 409) await load();
       setError(e instanceof Error ? e.message : "Falha ao enviar.");
     } finally {
       submitting.current = false;

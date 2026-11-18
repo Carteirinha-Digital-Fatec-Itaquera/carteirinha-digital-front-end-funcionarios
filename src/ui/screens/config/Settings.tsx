@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Eye, Info, Settings as SettingsIcon, ShieldCheck } from 'lucide-react';
+import { Check, Eye, Globe, Mail, MapPin, Phone, Settings as SettingsIcon, ShieldCheck } from 'lucide-react';
 import { changePassword, getInstitution } from '../../../api/employee';
 import { useResource } from '../../../hooks';
 import { setSession } from '../../../session';
@@ -9,6 +9,7 @@ import PageLayout from '../../components/page/PageLayout';
 import Modal from '../../components/modal/Modal';
 import { Status } from '../Status';
 import styles from './style.module.css';
+import help from '../help/style.module.css';
 
 const preference = 'carteirinha-funcionarios.accessibility';
 const daltonismoTypes = [
@@ -178,16 +179,28 @@ export function Settings() {
 export function Institution({ embedded = false }: { embedded?: boolean }) {
   const result = useResource(getInstitution);
   const unit = result.data;
+  const address = unit && [unit.address, unit.city, unit.state, unit.postalCode].filter(Boolean).join(' · ');
+  const contacts = unit ? [
+    { label: 'Endereço', value: address, Icon: MapPin },
+    { label: 'Telefone', value: unit.phone, Icon: Phone },
+    { label: 'E-mail', value: unit.email, Icon: Mail, href: unit.email ? 'mailto:' + unit.email : undefined },
+    { label: 'Site', value: unit.website, Icon: Globe, href: unit.website && /^https?:\/\//i.test(unit.website) ? unit.website : undefined },
+  ] : [];
   const content = <>
     <Status {...result} />
-    {unit && <section className="information-panel">
-      <h2>{unit.name}</h2>
-      {[unit.address, unit.city, unit.state, unit.postalCode].filter(Boolean).length > 0 &&
-        <p>{[unit.address, unit.city, unit.state, unit.postalCode].filter(Boolean).join(' · ')}</p>}
-      {unit.phone && <p>Telefone: {unit.phone}</p>}
-      {unit.email && <p>E-mail: <a href={'mailto:' + unit.email}>{unit.email}</a></p>}
-      {unit.website && /^https?:\/\//i.test(unit.website) && <p><a href={unit.website}>Site institucional</a></p>}
+    {unit && <section className={help.contentWrapper}>
+      <p className={help.faleConoscoLabel}>{unit.shortName}</p>
+      <h2 className={help.mainTitle}>Contatos</h2>
+      <div className={help.contactList}>
+        {contacts.map(({ Icon, label, value, href }) => value && <div className={help.contactCard} key={label}>
+          <span className={help.iconCircle}><Icon aria-hidden="true" /></span>
+          <div className={help.contactInfo}><strong>{label}</strong>
+            <p>{href ? <a href={href}>{value}</a> : value}</p>
+          </div>
+        </div>)}
+      </div>
     </section>}
+    {!embedded && <footer className={help.footerLogos}><img className={help.footerLogoImg} src="/cps_logo_br.png" alt="Centro Paula Souza" /></footer>}
   </>;
-  return embedded ? content : <PageLayout title="Informações da Unidade" backTo="/" icon={<Info />} roundedHeader>{content}</PageLayout>;
+  return embedded ? content : <PageLayout title="Informações da Unidade" subtitle="Encontre os canais de atendimento da sua instituição." backTo="/" roundedHeader>{content}</PageLayout>;
 }
