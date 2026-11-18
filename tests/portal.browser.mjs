@@ -23,7 +23,7 @@ const sessionStorageKey = 'carteirinha-funcionarios.session';
 async function installMock(context) {
   const state = {
     photos: [approved(1), approved(2)], pending: null, rejected: false, photoVersion: 3,
-    conflict: true, ticketConflict: true, revoked: new Set(), calls: [], ticket: null, messages: [], read: false, offline: false,
+    conflict: true, ticketConflict: true, activated: false, revoked: new Set(), calls: [], ticket: null, messages: [], read: false, offline: false,
   };
   await context.route(api + '/**', async route => {
     const req = route.request();
@@ -41,16 +41,18 @@ async function installMock(context) {
       const input = req.postDataJSON();
       if (path.endsWith('/login')) {
         const index = input.email === 'segunda@example.test' ? 1 : 0;
-        if (input.password !== 'senha-sintetica') return reply({ statusCode: 401, message: 'Credenciais inválidas.' }, 401);
+        if (input.password !== 'senha-sintetica' && !(state.activated && input.password === 'nova-senha-sintetica')) return reply({ statusCode: 401, message: 'Credenciais inválidas.' }, 401);
         return reply({ token: 'token-teste-' + index, profileType: 'employee', mustChangePassword: false, expiresAt: '2099-01-01T00:00:00Z' });
       }
       if (path.endsWith('solicitar-acesso') || path.endsWith('forgot-password')) {
-        assert.deepEqual(input, { email: 'pessoa@example.test' });
+        assert.deepEqual(input, { email: input.email });
+        assert.ok(['pessoa@example.test', 'desconhecido@example.test'].includes(input.email));
         return reply({ accepted: true }, 202);
       }
       const activation = path.endsWith('ativar');
       assert.ok(activation || path.endsWith('reset'));
       assert.deepEqual(input, { token: activation ? 'ativacao-ficticia-123' : 'redefinicao-ficticia-123', newPassword: 'nova-senha-sintetica' });
+      if (activation) state.activated = true;
       return reply(activation ? { activated: true } : { reset: true });
     }
     if (path.startsWith('/funcionarios/verificar/')) {
@@ -171,7 +173,16 @@ async function logout(page) {
   assert.equal(await page.evaluate(key => sessionStorage.getItem(key), sessionStorageKey), null);
 }
 
-async function authFlows(page) {
+async function authFlows(page, state) {
+  await page.goto(base + '/ativar-acesso');
+  await page.getByRole('link', { name: 'Solicitar novo link' }).waitFor();
+  assert.equal(await page.getByLabel('Nova senha', { exact: true }).count(), 0);
+  for (const email of ['pessoa@example.test', 'desconhecido@example.test']) {
+    await page.goto(base + '/primeiro-acesso');
+    await page.getByLabel('E-mail', { exact: true }).fill(email);
+    await button(page, 'Enviar link').click();
+    await page.getByText('Se a conta estiver apta, você receberá um link por e-mail.', { exact: true }).waitFor();
+  }
   for (const flow of [
     ['/primeiro-acesso', 'Primeiro acesso', '/ativar-acesso', 'ativacao-ficticia-123'],
     ['/recuperar-senha', 'Recuperar senha', '/redefinir-senha', 'redefinicao-ficticia-123'],
@@ -185,9 +196,30 @@ async function authFlows(page) {
     await page.getByLabel('Nova senha', { exact: true }).waitFor();
     assert.equal(new URL(page.url()).search, '');
     await page.getByLabel('Nova senha', { exact: true }).fill('nova-senha-sintetica');
+    await page.getByLabel('Confirmar nova senha').fill('senha-diferente');
+    const requests = state.calls.length;
+    await button(page, 'Salvar senha').click();
+    await page.getByText(/confirme a mesma senha/).waitFor();
+    assert.equal(state.calls.length, requests);
+    await button(page, 'Fechar').click();
     await page.getByLabel('Confirmar nova senha').fill('nova-senha-sintetica');
     await button(page, 'Salvar senha').click();
-    await page.getByText(/Senha definida/).waitFor();
+    await heading(page, 'Login').waitFor();
+    await page.getByText(flow[0] === '/primeiro-acesso' ? /Acesso ativado/ : /Senha redefinida/).waitFor();
+    if (flow[0] === '/primeiro-acesso') {
+      const previousPhoto = state.photos[0];
+      state.photos[0] = null;
+      await page.getByLabel('E-mail', { exact: true }).fill('pessoa@example.test');
+      await page.getByLabel('Senha', { exact: true }).fill('nova-senha-sintetica');
+      await button(page, 'Entrar').click();
+      await page.getByRole('link', { name: 'Envie uma foto para análise' }).waitFor();
+      await page.getByRole('link', { name: 'Conferir meus dados' }).click();
+      await heading(page, 'Meus dados').waitFor();
+      await page.getByText(people[0].email, { exact: true }).waitFor();
+      assert.equal(await page.locator('input').count(), 0);
+      await logout(page);
+      state.photos[0] = previousPhoto;
+    }
   }
 }
 
@@ -302,7 +334,7 @@ try {
     await heading(page, 'Recuperar senha').waitFor();
     await capture(page, 'recuperacao-' + viewport.width);
     if (viewport.width === 1440) {
-      await authFlows(page);
+      await authFlows(page, state);
       await login(page, 0, 'senha-incorreta');
       await page.getByText('Credenciais inválidas.', { exact: true }).waitFor();
     }
