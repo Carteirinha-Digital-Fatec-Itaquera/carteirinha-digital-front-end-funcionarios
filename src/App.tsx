@@ -5,6 +5,7 @@ import { getProfile } from './api/employee';
 import { useResource } from './hooks';
 import { Status } from './ui/screens/Status';
 import PageLayout from './ui/components/page/PageLayout';
+import EmployeeProfile from './ui/screens/profile/EmployeeProfile';
 import AuthScreen from './ui/screens/login/AuthScreen';
 import MainMenu from './ui/screens/mainmenu/MainMenuScreen';
 import SupportScreen from './ui/screens/support/SupportScreen';
@@ -51,6 +52,7 @@ export default function App() {
     </PageLayout>} />
     <Route element={<Protected />}>
       <Route index element={<MainMenu />} />
+      <Route path="/meus-dados" element={<EmployeeProfile />} />
       <Route path="/carteirinha" element={<CardScreen />} />
       <Route path="/qr" element={<QrScreen />} />
       <Route path="/foto" element={<PhotoScreen />} />

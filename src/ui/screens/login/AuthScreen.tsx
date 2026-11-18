@@ -53,7 +53,7 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
         setSession(null);
         setPassword('');
         setConfirm('');
-        setNotice('Senha definida. Volte ao login para acessar sua conta.');
+        navigate('/login', { replace: true, state: { [mode === 'activate' ? 'activated' : 'reset']: true } });
       }
     } catch (e) {
       setError((e as Error).message);
@@ -67,16 +67,20 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
     <form className={mode === "login" ? styles.subcontainer : styles.accessForm} onSubmit={submit}>
       <InternetWatcher />
       {mode === 'login' && <h1 className={styles.loginHeading}>Login</h1>}
+      {mode === 'login' && locationState?.activated && <p role="status">Acesso ativado. Entre com o e-mail cadastrado e a senha que você definiu.</p>}
+      {mode === 'login' && locationState?.reset && <p role="status">Senha redefinida. Entre com a nova senha.</p>}
       {mode === 'login' && locationState?.changedPassword && <p role="status">Senha alterada. Entre com a nova senha.</p>}
       {notice ? <p role="status">{notice}</p> : <>
+        {mode === "access" && <p>Use o e-mail cadastrado pela Secretaria. Se ele estiver apto, você receberá um link para definir sua senha.</p>}
+        {action && actionToken && <p>Escolha uma senha de pelo menos 8 caracteres e confirme no segundo campo.</p>}
         {mode === "recovery" && <p>Informe seu e-mail para receber as instruções de redefinição.</p>}
         <div className={styles.formFields}>
           {!action && <InputComp label="E-mail" placeholder="Seu e-mail" type="email" value={email} onChangeText={setEmail} />}
-          {!emailForm && <InputPasswordComp label={action ? 'Nova senha' : 'Senha'} placeholder="Sua senha" autoComplete={action ? "new-password" : "current-password"} value={password} onChangeText={setPassword} />}
-          {action && <InputPasswordComp label="Confirmar nova senha" placeholder="Repita a senha" autoComplete="new-password" value={confirm} onChangeText={setConfirm} />}
+          {!emailForm && (!action || actionToken) && <InputPasswordComp label={action ? 'Nova senha' : 'Senha'} placeholder="Sua senha" autoComplete={action ? "new-password" : "current-password"} value={password} onChangeText={setPassword} />}
+          {action && actionToken && <InputPasswordComp label="Confirmar nova senha" placeholder="Repita a senha" autoComplete="new-password" value={confirm} onChangeText={setConfirm} />}
         </div>
         {mode === 'login' && <Link className={styles.forgotPassword} to="/recuperar-senha">Esqueceu a sua senha?</Link>}
-        {action && !actionToken && <p role="alert">Este link não contém um código de acesso válido.</p>}
+        {action && !actionToken && <p role="alert">Este link não contém um código válido. <Link to={mode === "activate" ? "/primeiro-acesso" : "/recuperar-senha"}>Solicitar novo link</Link>.</p>}
         <div className={mode === "login" ? styles.loginAction : styles.accessAction}>
           {busy ? <p className={styles.loginLoading} role="status">Aguarde…</p> :
             <button className="primary-action" disabled={action && !actionToken}>

@@ -22,6 +22,10 @@ Na homologação, use HTTPS, `BREVO_API_KEY` e remetente verificado, Cloudinary 
 
 Execute o build com `VITE_API_BASE_URL=http://localhost:3099`. Instale o Chromium do Playwright com `npx playwright install chromium` ou indique um Chromium instalado em `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. Execute `npm run test:browser`. A suíte usa fixtures do contrato e intercepta a API. Cobre autenticação, ciclo de foto, solicitações, QR, indisponibilidade e navegação em 390×844 e 1440×900. Para salvar capturas com dados fictícios, defina `PORTAL_TEST_SCREENSHOTS` com o diretório de saída antes de rodar o teste. Validação de CORS, banco, entrega de e-mail e storage reais exige homologação.
 
+## Primeiro acesso
+
+Use **Solicitar primeiro acesso** com o e-mail cadastrado pela Secretaria. O portal dá a mesma confirmação para pedidos aceitos, sem confirmar se existe uma conta. A senha e sua confirmação são solicitadas apenas na tela aberta pelo link com token. Após salvar, a tela de login confirma a ativação. Na Home, **Conferir meus dados** mostra os dados já cadastrados; alterações cadastrais seguem pelo suporte. Se não houver foto aprovada, o portal informa como enviar ou acompanhar uma foto.
+
 ## Sessão e modo offline
 
 O Bearer fica em `sessionStorage` com uma chave específica deste portal, preservando o login após recarregar na mesma aba. O fechamento da aba normalmente encerra essa persistência local. O backend revalida a conta antes de mostrar rotas privadas. Logout e troca de senha removem a credencial local. Logout local não revoga JWT em outros dispositivos. Acesso por script da mesma origem, incluindo XSS, continua sendo um risco inerente ao armazenamento acessível ao JavaScript. Servir o portal em origem exclusiva, com HTTPS e sem scripts de terceiros. Um futuro contrato com cookie HttpOnly permitiria eliminar esse risco de leitura direta do Bearer.

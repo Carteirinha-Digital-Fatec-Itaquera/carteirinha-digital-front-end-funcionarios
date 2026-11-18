@@ -38,7 +38,8 @@ export default function MainMenuScreen() {
           <h1 className={styles.welcomeText}>
             Bem-vindo(a), {profile.data?.displayName ?? 'Funcionário'}
           </h1>
-          <p className={styles.intro}>Acesse sua identificação e acompanhe suas solicitações.</p>
+          <p className={styles.intro}>Acesse sua identificação e acompanhe suas solicitações. <Link to="/meus-dados">Conferir meus dados</Link>.</p>
+          {photo.data && !photo.data.approved && !photo.data.pending && <p>Você ainda não tem uma foto aprovada. <Link to="/foto">Envie uma foto para análise</Link>.</p>}
 
           <PhotoStatus key={photo.data?.approved?.id ?? 'without-approved-photo'} status={status}
             approvedPhotoId={photo.data?.approved?.id}
