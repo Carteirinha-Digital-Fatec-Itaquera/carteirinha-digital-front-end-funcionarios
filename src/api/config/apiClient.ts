@@ -47,7 +47,8 @@ export async function apiClient(path: string, { authenticated, body, ...options 
   }
   if (token && sessionStorage.getItem(sessionKey) === token && !response.ok) {
     const failure = await buildApiError(response.clone());
-    if (failure.status === 401 || failure.code === 'ACCOUNT_BLOCKED' || failure.code === 'ROLE_FORBIDDEN') {
+    if (sessionStorage.getItem(sessionKey) === token &&
+      (failure.status === 401 || failure.code === 'ACCOUNT_BLOCKED' || failure.code === 'ROLE_FORBIDDEN')) {
       sessionStorage.removeItem(sessionKey);
       window.dispatchEvent(new Event(sessionKey));
     }

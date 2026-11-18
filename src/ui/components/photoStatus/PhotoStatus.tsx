@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CircleCheckBig, Clock, CircleX, Info, X } from 'lucide-react';
 import type { EmployeePhotoReviewStatus as PhotoStatusType } from '../../../domains/employee';
@@ -11,32 +11,32 @@ const statuses = {
   REJECTED: { title: 'Foto reprovada', message: 'Sua fotografia não foi aprovada. Envie uma nova foto para análise.', Icon: CircleX, tone: 'rejected' },
 } as const;
 
-export default function PhotoStatus({ status, availability, studentKey }: { status?: PhotoStatusType; availability: PhotoStatusAvailability; studentKey?: string }) {
-  const storageKey = studentKey ? `@CarteirinhaFuncionarios:approvedPhotoNotice:${encodeURIComponent(studentKey)}` : undefined;
-  const [dismissedKey, setDismissedKey] = useState<string | undefined | null>(null);
-
-  // Uma nova foto em análise ou reprovada confirma um novo ciclo: a próxima
-  // aprovação deve voltar a aparecer, mesmo que o aviso anterior tenha sido fechado.
-  useEffect(() => {
-    if (availability !== 'ready' || !storageKey || (status !== 'PENDING' && status !== 'REJECTED')) return;
-    try { localStorage.removeItem(storageKey); } catch { /* Armazenamento indisponível. */ }
-  }, [availability, status, storageKey]);
-
+export default function PhotoStatus({ status, availability, approvedPhotoId }: {
+  status?: PhotoStatusType;
+  availability: PhotoStatusAvailability;
+  approvedPhotoId?: string;
+}) {
+  // Cada upload recebe um UUID próprio do backend. Guardar só o ID da foto
+  // permite uma nova aprovação sem gravar nome, email, matrícula ou ID de conta.
+  const storageKey = approvedPhotoId
+    ? `@CarteirinhaFuncionarios:approvedPhotoNotice:${encodeURIComponent(approvedPhotoId)}`
+    : undefined;
+  const [dismissed, setDismissed] = useState(false);
   let savedDismissal = false;
   if (storageKey) {
-    try { savedDismissal = localStorage.getItem(storageKey) === '1'; } catch { /* Armazenamento indisponível: fechamento apenas nesta montagem. */ }
+    try { savedDismissal = localStorage.getItem(storageKey) === '1'; } catch { /* Fechamento local nesta montagem. */ }
   }
   const dismissApproval = () => {
-    setDismissedKey(storageKey);
+    setDismissed(true);
     if (storageKey) {
-      try { localStorage.setItem(storageKey, '1'); } catch { /* Não impede o fechamento visual. */ }
+      try { localStorage.setItem(storageKey, '1'); } catch { /* Fechamento local nesta montagem. */ }
     }
   };
   // Cache e sucesso do upload não confirmam o estado atual da análise.
   if (availability === 'loading') return null;
   const current = availability === 'ready' && (status === 'PENDING' || status === 'APPROVED' || status === 'REJECTED') ? statuses[status] : null;
   if (availability === 'ready' && !current) return null;
-  if (current && status === 'APPROVED' && (savedDismissal || dismissedKey === storageKey)) return null;
+  if (current && status === 'APPROVED' && (savedDismissal || dismissed)) return null;
   const Icon = current?.Icon ?? Info;
   return (
     <section className={`${styles.card} ${current ? styles[current.tone] : styles.neutral} ${current && status === 'APPROVED' ? styles.dismissible : ''}`} aria-label="Situação da fotografia">

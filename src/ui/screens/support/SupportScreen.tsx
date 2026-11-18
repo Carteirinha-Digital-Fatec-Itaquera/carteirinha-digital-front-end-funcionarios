@@ -596,13 +596,13 @@ export default function SupportScreen() {
                 ))}
               </ol>
             </section>
-            <section
+            {detail.ticket.status !== "CLOSED" && <section
               className="support-reply"
               aria-label="Responder ao atendimento"
             >
               <label>
                 {terminal
-                  ? "Mensagem para reabrir ou confirmar a solução"
+                  ? "Mensagem para confirmar a solução"
                   : "Sua mensagem"}
                 <textarea
                   disabled={busy}
@@ -610,7 +610,7 @@ export default function SupportScreen() {
                   maxLength={3000}
                   placeholder={
                     terminal
-                      ? "Informe o motivo ou confirme que o problema foi resolvido."
+                      ? "Confirme que o problema foi resolvido."
                       : "Escreva sua resposta para a Secretaria…"
                   }
                   value={message}
@@ -636,22 +636,11 @@ export default function SupportScreen() {
                     Confirmar solução e encerrar
                   </button>
                 )}
-                {terminal && (
-                  <button
-                    disabled={busy || message.trim().length < 3}
-                    onClick={() => void act("reopen")}
-                  >
-                    Reabrir solicitação
-                  </button>
-                )}
               </div>
-              {terminal && (
-                <p className="support-muted">
-                  Informe ao menos 3 caracteres. Reabertura disponível por até
-                  sete dias após a resolução ou o encerramento.
-                </p>
-              )}
-            </section>
+            </section>}
+            {detail.ticket.status === "CLOSED" && (
+              <p className="support-muted">Se precisar de mais ajuda, <Link to="/suporte">abra uma nova solicitação</Link>.</p>
+            )}
             <div className="support-other-actions">
               <button
                 aria-expanded={showActions}
@@ -727,7 +716,7 @@ export default function SupportScreen() {
         message={
           dangerAction === "delete"
             ? "A solicitação será retirada das listas do funcionário e da Secretaria. O histórico será preservado para auditoria."
-            : "O atendimento será encerrado como cancelado. Você poderá reabri-lo dentro do prazo de sete dias."
+            : "O atendimento será encerrado como cancelado."
         }
         confirmText={
           dangerAction === "delete"

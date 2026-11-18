@@ -204,7 +204,8 @@ export function VerificationScreen() {
   const result = useResource(load);
   const credential = result.data;
   const image = usePhotoUrl(credential?.valid ? credential.photoUrl : null, false);
-  return <PageLayout title="Validação da carteirinha" brand={<img src={logoFatecBranco} alt="Fatec Itaquera" />} narrow roundedHeader>
+  return <PageLayout title="Validação da carteirinha" subtitle="Consulta pública da identificação funcional."
+    backTo="/login" backLabel="Acessar Carteirinha Digital" brand={<img src={logoFatecBranco} alt="Fatec Itaquera" />} narrow roundedHeader>
     <Status {...result} />
     {credential && <>
       <section className={validation.card}>
@@ -217,10 +218,11 @@ export function VerificationScreen() {
               {credential.activeAssignments.map((item, index) => <p key={index}>{item.title}</p>)}
             </div>
           </div>
-          <p>Carteirinha válida · Validade {validity(credential.validityKind, credential.validUntil)}</p>
+          <p className={validation.badgeWrapper}>Carteirinha válida · Validade {validity(credential.validityKind, credential.validUntil)}</p>
         </> : <p role="status">Carteirinha inválida. {reason(credential.reasonCode)}</p>}
       </section>
       <p className={validation.timestamp}>Verificado em {new Date(credential.checkedAt).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</p>
     </>}
+    <footer className={validation.redFooter}><img src={logoCpsBranco} className={validation.govLogo} alt="Centro Paula Souza" /></footer>
   </PageLayout>;
 }

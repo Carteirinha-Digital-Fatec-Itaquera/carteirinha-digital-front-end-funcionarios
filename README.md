@@ -20,7 +20,7 @@ Na homologação, use HTTPS, `BREVO_API_KEY` e remetente verificado, Cloudinary 
 
 ## Testar com API simulada
 
-Execute o build com `VITE_API_BASE_URL=http://localhost:3099`. Instale o Chromium do Playwright com `npx playwright install chromium` ou indique um Chromium instalado em `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. Execute `npm run test:browser`. A suíte usa fixtures do contrato e intercepta a API. Ela não valida CORS, banco, entrega de e-mail nem storage reais.
+Execute o build com `VITE_API_BASE_URL=http://localhost:3099`. Instale o Chromium do Playwright com `npx playwright install chromium` ou indique um Chromium instalado em `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. Execute `npm run test:browser`. A suíte usa fixtures do contrato e intercepta a API. Cobre autenticação, ciclo de foto, solicitações, QR, indisponibilidade e navegação em 390×844 e 1440×900. Para salvar capturas com dados fictícios, defina `PORTAL_TEST_SCREENSHOTS` com o diretório de saída antes de rodar o teste. Validação de CORS, banco, entrega de e-mail e storage reais exige homologação.
 
 ## Sessão e modo offline
 
@@ -33,6 +33,10 @@ Os tokens dos links de acesso ficam em memória durante o formulário e são rem
 O backend mantém a foto aprovada anterior durante a análise de uma substituta. Ao rejeitar a substituta, `EmployeePhotoService.reviewPhoto` desmarca `currentPending`. `getMyPhotoStatus` seleciona apenas fotos marcadas como pendentes, e a credencial continua válida com a foto aprovada anterior. Nessa condição, a rejeição e o motivo podem ficar indisponíveis para o titular. A tela exibe o estado informado pela API, inclusive `PHOTO_REJECTED` quando a credencial o traz.
 
 Para cobrir o caso, é preciso publicar um resumo da última tentativa do titular, separado de `approved` e `pending`, no contrato de `GET /funcionarios/me/foto`. O resumo deve disponibilizar o estado de revisão e, nas rejeições, o motivo autorizado. O resumo deve distinguir uma tentativa superada por novo envio ou removida pelo titular e não deve tornar a imagem rejeitada pública. Depois de atualizar tipos e fixtures, validar rejeição com carteira previamente aprovada em teste HTTP e adaptar a UI ao novo campo.
+
+## Reabertura de solicitações
+
+O backend atual rejeita `POST /support/tickets/:id/reopen` para `EMPLOYEE`: a regra do serviço exige `STUDENT`. O portal oferece iniciar uma nova solicitação quando a anterior está encerrada. Para suportar reabertura de funcionários, o backend precisa admitir o titular `EMPLOYEE`, mantendo as verificações de propriedade, estado terminal, prazo, versão e idempotência, com teste HTTP para esse papel.
 
 ## Referências
 

@@ -40,7 +40,8 @@ export default function MainMenuScreen() {
           </h1>
           <p className={styles.intro}>Acesse sua identificação e acompanhe suas solicitações.</p>
 
-          <PhotoStatus key={status ?? 'unknown'} status={status}
+          <PhotoStatus key={photo.data?.approved?.id ?? 'without-approved-photo'} status={status}
+            approvedPhotoId={photo.data?.approved?.id}
             availability={photo.loading ? 'loading' : photo.error ? 'unavailable' : 'ready'} />
 
           {profile.error && <p role="alert">{profile.error}</p>}
