@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { login, requestAccess, redeemActionToken } from '../../../api/employee';
+import { login, requestPasswordReset, redeemActionToken } from '../../../api/employee';
 import { setSession, useSession } from '../../../session';
 import AuthLayout from '../../components/page/AuthLayout';
 import { InputComp } from '../../components/input/InputComp';
@@ -10,23 +10,22 @@ import { ErrorModalComp } from '../../components/ErrorModal/ErrorModalComp';
 import { InternetWatcher } from '../../components/internetwatcher/InternetWatcher';
 import styles from './style.module.css';
 
-type Mode = 'login' | 'access' | 'recovery' | 'activate' | 'reset';
-const titles = { login: 'Login', access: 'Primeiro acesso', recovery: 'Recuperar senha',
-  activate: 'Ativar acesso', reset: 'Redefinir senha' };
+type Mode = 'login' | 'recovery' | 'activate' | 'reset';
+let pendingFirstAccess: string | undefined;
+const titles = { login: 'Login', recovery: 'Recuperar senha',
+  activate: 'Criar senha pessoal', reset: 'Redefinir senha' };
 
 export default function AuthScreen({ mode }: { mode: Mode }) {
   const token = useSession();
   const navigate = useNavigate();
   const locationState = useLocation().state;
   const action = mode === 'activate' || mode === 'reset';
-  const emailForm = mode === 'access' || mode === 'recovery';
-  const [actionToken] = useState(() => action ? new URLSearchParams(location.search).get('token') : null);
+  const emailForm = mode === 'recovery';
+  const [actionToken] = useState(() => mode === 'activate' ? pendingFirstAccess : mode === 'reset' ? new URLSearchParams(location.search).get('token') : null);
   useLayoutEffect(() => {
-    if (action && location.search) history.replaceState(history.state, '', location.pathname);
-  }, [action]);
+    if (mode === 'reset' && location.search) history.replaceState(history.state, '', location.pathname);
+  }, [mode]);
   const [email, setEmail] = useState('');
-  const [registration, setRegistration] = useState('');
-  const [legacy, setLegacy] = useState(false);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
@@ -41,18 +40,25 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
     setBusy(true);
     try {
       if (mode === 'login') {
+        pendingFirstAccess = undefined;
         const result = await login(email.trim(), password);
-        if (result.profileType !== 'employee' || !result.token) throw new Error('Resposta de login inválida.');
+        if (result.mustChangePassword === true && result.firstAccessToken) {
+          pendingFirstAccess = result.firstAccessToken;
+          setPassword('');
+          navigate('/ativar-acesso', { replace: true });
+          return;
+        }
+        if (result.mustChangePassword !== false || result.profileType !== 'employee' || !result.token) throw new Error('Resposta de login inválida.');
         setSession(result.token);
         navigate('/', { replace: true });
       } else if (emailForm) {
-        if (mode === 'access' && !legacy && !registration.trim()) throw new Error('Informe sua matrícula funcional.');
-        await requestAccess(email.trim(), mode === 'recovery', legacy ? undefined : registration.trim());
+        await requestPasswordReset(email.trim());
         setNotice('Se a conta estiver apta, você receberá um link por e-mail.');
       } else {
-        if (!actionToken) throw new Error('Link inválido. Solicite um novo link.');
+        if (!actionToken) throw new Error('Autorização indisponível. Inicie o acesso novamente.');
         if (password.length < 8 || password !== confirm) throw new Error('Use pelo menos 8 caracteres e confirme a mesma senha.');
         await redeemActionToken(actionToken, password, mode === 'reset');
+        pendingFirstAccess = undefined;
         setSession(null);
         setPassword('');
         setConfirm('');
@@ -74,20 +80,15 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
       {mode === 'login' && locationState?.reset && <p role="status">Senha redefinida. Entre com a nova senha.</p>}
       {mode === 'login' && locationState?.changedPassword && <p role="status">Senha alterada. Entre com a nova senha.</p>}
       {notice ? <p role="status">{notice}</p> : <>
-        {mode === "access" && <p>Informe o e-mail cadastrado e a matrícula funcional. Se os dados estiverem aptos, enviaremos um link ao e-mail cadastrado para você definir sua senha pessoal.</p>}
         {action && actionToken && <p>Escolha uma senha de pelo menos 8 caracteres, diferente da matrícula funcional, e confirme no segundo campo.</p>}
         {mode === "recovery" && <p>Informe seu e-mail para receber as instruções de redefinição.</p>}
         <div className={styles.formFields}>
           {!action && <InputComp label="E-mail" placeholder="Seu e-mail" type="email" value={email} onChangeText={setEmail} />}
-          {mode === 'access' && <>
-            {!legacy && <label>Matrícula funcional<input type="password" maxLength={40} required autoComplete="off" value={registration} onChange={e => setRegistration(e.target.value)} /></label>}
-            <label><input type="checkbox" checked={legacy} onChange={e => setLegacy(e.target.checked)} /> Meu cadastro antigo não tem matrícula</label>
-          </>}
           {!emailForm && (!action || actionToken) && <InputPasswordComp label={action ? 'Nova senha' : 'Senha'} placeholder="Sua senha" autoComplete={action ? "new-password" : "current-password"} value={password} onChangeText={setPassword} />}
           {action && actionToken && <InputPasswordComp label="Confirmar nova senha" placeholder="Repita a senha" autoComplete="new-password" value={confirm} onChangeText={setConfirm} />}
         </div>
         {mode === 'login' && <Link className={styles.forgotPassword} to="/recuperar-senha">Esqueceu a sua senha?</Link>}
-        {action && !actionToken && <p role="alert">Este link não contém um código válido. <Link to={mode === "activate" ? "/primeiro-acesso" : "/recuperar-senha"}>Solicitar novo link</Link>.</p>}
+        {action && !actionToken && <p role="alert">{mode === "activate" ? "Inicie o primeiro acesso na tela de login." : "Link inválido. Solicite uma nova redefinição."}</p>}
         <div className={mode === "login" ? styles.loginAction : styles.accessAction}>
           {busy ? <p className={styles.loginLoading} role="status">Aguarde…</p> :
             <button className="primary-action" disabled={action && !actionToken}>
@@ -96,7 +97,7 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
         </div>
       </>}
       {mode === 'login' ? <>
-        <Link className={styles.firstAccessNotice} to="/primeiro-acesso">Primeiro acesso com matrícula</Link>
+        <p className={styles.firstAccessNotice}>No primeiro acesso, use o e-mail cadastrado e sua matrícula funcional no campo Senha.</p>
         <Link className={styles.projectCreditsLink} to="/ajuda-acesso">Preciso de ajuda para acessar</Link>
         <Link className={styles.projectCreditsLink} to="/creditos">Conheça quem constrói este projeto</Link>
         <img src="/cps_logo_cor.png" className={styles.logocps} alt="Centro Paula Souza" />

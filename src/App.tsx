@@ -40,14 +40,14 @@ export default function App() {
   return <BrowserRouter>
   <Routes>
     <Route path="/login" element={<AuthScreen key="login" mode="login" />} />
-    <Route path="/primeiro-acesso" element={<AuthScreen key="access" mode="access" />} />
+    <Route path="/primeiro-acesso" element={<Navigate to="/login" replace />} />
     <Route path="/recuperar-senha" element={<AuthScreen key="recovery" mode="recovery" />} />
     <Route path="/ativar-acesso" element={<AuthScreen key="activate" mode="activate" />} />
     <Route path="/redefinir-senha" element={<AuthScreen key="reset" mode="reset" />} />
     <Route path="/funcionarios/verificar/:qrcode" element={<VerificationScreen />} />
     <Route path="/creditos" element={<Credits />} />
     <Route path="/ajuda-acesso" element={<PageLayout title="Ajuda para acessar a carteirinha" backTo="/login" backLabel="Voltar ao login" narrow>
-      <p>Solicite um <Link to="/primeiro-acesso">link de primeiro acesso</Link> ou <Link to="/recuperar-senha">recupere sua senha</Link>.</p>
+      <p>No <Link to="/login">primeiro acesso</Link>, informe o e-mail cadastrado e use a matrícula funcional no campo Senha. Se já definiu sua senha, você pode <Link to="/recuperar-senha">recuperá-la</Link>.</p>
       <p>Se precisar de ajuda, consulte os contatos da unidade.</p><Institution embedded />
     </PageLayout>} />
     <Route element={<Protected />}>

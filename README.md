@@ -16,7 +16,7 @@ npm run preview
 
 O Vite usa a URL da API na hora do build. Em desenvolvimento, a API pode rodar em `http://localhost:3000`; a origem do portal deve ser autorizada no CORS do backend. Use um backend de desenvolvimento com migrations de funcionários aplicadas, JWT configurado e contas sintéticas previamente provisionadas pela Secretaria. Para testar os links e o QR, configure `EMPLOYEE_APP_URL` com a origem exata do portal, sem caminho final (por exemplo, `http://localhost:5173`). A página pública de QR e a API usam o mesmo caminho; mantenha API e SPA em origens distintas ou configure um prefixo de API.
 
-Na homologação, use HTTPS, `BREVO_API_KEY` e remetente verificado, Cloudinary privado e `PUBLIC_API_URL` para fotos de créditos quando houver proxy reverso. Configure contatos institucionais no backend conforme necessário. O host do portal deve encaminhar navegação direta para `index.html`, inclusive os links de ativação, redefinição e validação do QR.
+Na homologação, use HTTPS, `BREVO_API_KEY` e remetente verificado, Cloudinary privado e `PUBLIC_API_URL` para fotos de créditos quando houver proxy reverso. Configure contatos institucionais no backend conforme necessário. O host do portal deve encaminhar navegação direta para `index.html`, inclusive as rotas de criação de senha, redefinição e validação do QR.
 
 ## Testar com API simulada
 
@@ -24,13 +24,13 @@ Execute o build com `VITE_API_BASE_URL=http://localhost:3099`. Instale o Chromiu
 
 ## Primeiro acesso
 
-Use **Primeiro acesso com matrícula** e informe o e-mail cadastrado pela Secretaria e a matrícula. Contas antigas sem matrícula usam a opção de cadastro legado. Somente a pessoa com acesso à caixa do e-mail cadastrado pode abrir a autorização de ativação. O portal dá a mesma confirmação para pedidos aceitos, sem confirmar se existe uma conta. A senha e sua confirmação são solicitadas apenas na tela aberta pelo link com token. Após salvar, a tela de login confirma a ativação. Na Home, **Conferir meus dados** mostra os dados já cadastrados; alterações cadastrais seguem pelo suporte. Se não houver foto aprovada, o portal informa como enviar ou acompanhar uma foto.
+No primeiro login, informe o e-mail cadastrado pela Secretaria e use a matrícula funcional no campo **Senha**. Na tela **Criar senha pessoal**, defina e confirme a nova senha. Depois, entre com e-mail e senha pessoal. Em cadastros antigos sem matrícula, peça à Secretaria para atualizar o cadastro. Na Home, **Conferir meus dados** mostra os dados cadastrados.
 
 ## Sessão e modo offline
 
 O Bearer fica em `sessionStorage` com uma chave específica deste portal, preservando o login após recarregar na mesma aba. O fechamento da aba normalmente encerra essa persistência local. O backend revalida a conta antes de mostrar rotas privadas. Logout e troca de senha removem a credencial local. Logout local não revoga JWT em outros dispositivos. Acesso por script da mesma origem, incluindo XSS, continua sendo um risco inerente ao armazenamento acessível ao JavaScript. Servir o portal em origem exclusiva, com HTTPS e sem scripts de terceiros. Um futuro contrato com cookie HttpOnly permitiria eliminar esse risco de leitura direta do Bearer.
 
-Os tokens dos links de acesso ficam em memória durante o formulário e são removidos da URL após leitura. O Service Worker guarda somente arquivos públicos do aplicativo. Offline é possível abrir a interface e ver o aviso de indisponibilidade. O portal não guarda cópia da carteirinha, fotos, tickets ou respostas de autenticação. O QR público consulta a situação atual.
+A autorização do primeiro acesso fica em memória durante o formulário. O token do link de recuperação é removido da URL após leitura. O Service Worker guarda somente arquivos públicos do aplicativo. Offline é possível abrir a interface e ver o aviso de indisponibilidade. O portal não guarda cópia da carteirinha, fotos, tickets ou respostas de autenticação. O QR público consulta a situação atual.
 
 ## Lacuna da rejeição de foto
 

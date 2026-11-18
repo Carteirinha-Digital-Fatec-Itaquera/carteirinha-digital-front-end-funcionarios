@@ -41,12 +41,12 @@ async function installMock(context) {
       const input = req.postDataJSON();
       if (path.endsWith('/login')) {
         const index = input.email === 'segunda@example.test' ? 1 : 0;
+        if (!state.activated && input.email === 'pessoa@example.test' && input.password === 'FUN-FICTICIA') return reply({ firstAccessToken: 'ativacao-ficticia-123', profileType: 'employee', mustChangePassword: true, expiresAt: '2099-01-01T00:00:00Z' });
         if (input.password !== 'senha-sintetica' && !(state.activated && input.password === 'nova-senha-sintetica')) return reply({ statusCode: 401, message: 'Credenciais inválidas.' }, 401);
         return reply({ token: 'token-teste-' + index, profileType: 'employee', mustChangePassword: false, expiresAt: '2099-01-01T00:00:00Z' });
       }
-      if (path.endsWith('solicitar-acesso') || path.endsWith('forgot-password')) {
-        if (path.endsWith('solicitar-acesso')) assert.deepEqual(input, { email: input.email, registrationNumber: 'FUN-FICTICIA' });
-        else assert.deepEqual(input, { email: input.email });
+      if (path.endsWith('forgot-password')) {
+        assert.deepEqual(input, { email: input.email });
         assert.ok(['pessoa@example.test', 'desconhecido@example.test'].includes(input.email));
         return reply({ accepted: true }, 202);
       }
@@ -175,27 +175,25 @@ async function logout(page) {
 }
 
 async function authFlows(page, state) {
-  await page.goto(base + '/ativar-acesso');
-  await page.getByRole('link', { name: 'Solicitar novo link' }).waitFor();
+  await page.goto(base + '/ativar-acesso?token=ativacao-ficticia-123');
+  await page.getByText(/Inicie o primeiro acesso/).waitFor();
   assert.equal(await page.getByLabel('Nova senha', { exact: true }).count(), 0);
-  for (const email of ['pessoa@example.test', 'desconhecido@example.test']) {
-    await page.goto(base + '/primeiro-acesso');
-    await page.getByLabel('E-mail', { exact: true }).fill(email);
-    await page.getByLabel('Matrícula funcional', { exact: true }).fill('FUN-FICTICIA');
-    await button(page, 'Enviar link').click();
-    await page.getByText('Se a conta estiver apta, você receberá um link por e-mail.', { exact: true }).waitFor();
-  }
-  for (const flow of [
-    ['/primeiro-acesso', 'Primeiro acesso', '/ativar-acesso', 'ativacao-ficticia-123'],
-    ['/recuperar-senha', 'Recuperar senha', '/redefinir-senha', 'redefinicao-ficticia-123'],
-  ]) {
-    await page.goto(base + flow[0]);
-    await heading(page, flow[1]).waitFor();
+  for (const activation of [true, false]) {
+    await page.goto(base + (activation ? '/login' : '/recuperar-senha'));
+    await heading(page, activation ? 'Login' : 'Recuperar senha').waitFor();
     await page.getByLabel('E-mail', { exact: true }).fill('pessoa@example.test');
-    if (flow[0] === '/primeiro-acesso') await page.getByLabel('Matrícula funcional', { exact: true }).fill('FUN-FICTICIA');
-    await button(page, 'Enviar link').click();
-    await page.getByText(/receberá um link/).waitFor();
-    await page.goto(base + flow[2] + '?token=' + flow[3]);
+    if (activation) {
+      const requests = state.calls.length;
+      await page.getByLabel('Senha', { exact: true }).fill('FUN-FICTICIA');
+      await button(page, 'Entrar').click();
+      await heading(page, 'Criar senha pessoal').waitFor();
+      assert.deepEqual(state.calls.slice(requests), [['POST', auth + '/login']]);
+      assert.equal(await page.evaluate(key => sessionStorage.getItem(key), sessionStorageKey), null);
+    } else {
+      await button(page, 'Enviar link').click();
+      await page.getByText(/receberá um link/).waitFor();
+      await page.goto(base + '/redefinir-senha?token=redefinicao-ficticia-123');
+    }
     await page.getByLabel('Nova senha', { exact: true }).waitFor();
     assert.equal(new URL(page.url()).search, '');
     await page.getByLabel('Nova senha', { exact: true }).fill('nova-senha-sintetica');
@@ -208,8 +206,8 @@ async function authFlows(page, state) {
     await page.getByLabel('Confirmar nova senha').fill('nova-senha-sintetica');
     await button(page, 'Salvar senha').click();
     await heading(page, 'Login').waitFor();
-    await page.getByText(flow[0] === '/primeiro-acesso' ? /Acesso ativado/ : /Senha redefinida/).waitFor();
-    if (flow[0] === '/primeiro-acesso') {
+    await page.getByText(activation ? /Acesso ativado/ : /Senha redefinida/).waitFor();
+    if (activation) {
       const previousPhoto = state.photos[0];
       state.photos[0] = null;
       await page.getByLabel('E-mail', { exact: true }).fill('pessoa@example.test');
