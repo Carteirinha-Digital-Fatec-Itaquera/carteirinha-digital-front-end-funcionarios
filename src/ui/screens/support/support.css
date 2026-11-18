@@ -47,29 +47,29 @@
 }
 .student-support button {
   padding: 10px 16px;
-  border: 1px solid var(--app-color-danger);
+  border: 1px solid var(--app-color-primary);
   border-radius: 10px;
   background: white;
-  color: var(--app-color-danger);
+  color: var(--app-color-primary);
   font-weight: 600;
   cursor: pointer;
 }
 .student-support button:hover:not(:disabled) {
-  background: #fff3f3;
+  background: var(--app-color-primary-soft);
 }
 .student-support button.support-primary {
-  background: var(--app-color-primary, var(--app-color-danger));
+  background: var(--app-color-primary);
   color: white;
 }
 .student-support button.support-primary:hover:not(:disabled) {
-  background: var(--app-color-danger);
+  background: var(--app-color-primary);
 }
 .student-support button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 .student-support a {
-  color: var(--app-color-danger);
+  color: var(--app-color-primary);
 }
 .student-support :focus-visible {
   outline: 3px solid #3168b5;
@@ -149,7 +149,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--app-color-danger);
+  color: var(--app-color-primary);
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -177,7 +177,7 @@
   color: #266342;
 }
 .support-unread {
-  color: var(--app-color-danger);
+  color: var(--app-color-primary);
   font-weight: 600;
   font-size: 0.8rem;
 }
@@ -233,8 +233,8 @@
   border-left: 3px solid #bcc7d3;
 }
 .support-conversation .support-message-secretary {
-  background: #fdf5f5;
-  border-left-color: var(--app-color-danger);
+  background: var(--app-color-primary-soft);
+  border-left-color: var(--app-color-primary);
 }
 .support-conversation li > div {
   display: flex;

@@ -5,3 +5,5 @@
 .userImage { width: 100%; height: 100%; object-fit: cover; }
 .button { composes: button from '../../components/button/style.module.css'; min-width: 0; padding: 12px; }
 @media(max-width:540px) { .container { padding: 24px 16px; } }
+
+.container { gap: var(--app-space-12); }

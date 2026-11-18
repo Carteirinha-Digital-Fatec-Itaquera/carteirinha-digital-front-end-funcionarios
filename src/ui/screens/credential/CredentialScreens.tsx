@@ -52,7 +52,7 @@ export function CardScreen() {
           <button aria-label="Voltar ao menu" className={styles.backButton} onClick={() => navigate("/")}>
             <ArrowLeft size={24} color="#ffffff" strokeWidth={3} />
           </button>
-          <IdCard size={30} aria-hidden="true" />
+          <IdCard size={30} color="white" aria-hidden="true" />
           <span className={styles.headerTitle}>Carteirinha</span>
           <div style={{ width: 44 }} />
         </header>
@@ -169,7 +169,7 @@ export function QrScreen() {
   return <main className={qr.container}>
     <div className={qr.appWrapper}>
       <header className={qr.redHeader}>
-        <button className={qr.backButton} aria-label="Voltar ao menu" onClick={() => navigate('/')}><ArrowLeft size={24} strokeWidth={3} /></button>
+        <button className={qr.backButton} aria-label="Voltar ao menu" onClick={() => navigate('/')}><ArrowLeft size={24} color="white" strokeWidth={3} /></button>
         <img src={logoFatecBranco} className={qr.logoTop} alt="Fatec Itaquera" />
       </header>
       <div className={qr.contentWrapper}><div className={qr.cardContainer}>

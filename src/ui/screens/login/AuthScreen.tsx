@@ -62,12 +62,14 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
     }
   }
 
-  return <AuthLayout title={titles[mode]} variant={mode === 'login' ? 'classic' : 'default'}>
-    <form className={styles.subcontainer} onSubmit={submit}>
+  return <AuthLayout title={titles[mode]} variant={mode === 'login' ? 'classic' : 'default'}
+    subtitle={mode === "recovery" ? "Vamos ajudar você a entrar novamente na sua conta." : undefined}>
+    <form className={mode === "login" ? styles.subcontainer : styles.accessForm} onSubmit={submit}>
       <InternetWatcher />
       {mode === 'login' && <h1 className={styles.loginHeading}>Login</h1>}
       {mode === 'login' && locationState?.changedPassword && <p role="status">Senha alterada. Entre com a nova senha.</p>}
       {notice ? <p role="status">{notice}</p> : <>
+        {mode === "recovery" && <p>Informe seu e-mail para receber as instruções de redefinição.</p>}
         <div className={styles.formFields}>
           {!action && <InputComp label="E-mail" placeholder="Seu e-mail" type="email" value={email} onChangeText={setEmail} />}
           {!emailForm && <InputPasswordComp label={action ? 'Nova senha' : 'Senha'} placeholder="Sua senha" autoComplete={action ? "new-password" : "current-password"} value={password} onChangeText={setPassword} />}
@@ -75,7 +77,7 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
         </div>
         {mode === 'login' && <Link className={styles.forgotPassword} to="/recuperar-senha">Esqueceu a sua senha?</Link>}
         {action && !actionToken && <p role="alert">Este link não contém um código de acesso válido.</p>}
-        <div className={styles.loginAction}>
+        <div className={mode === "login" ? styles.loginAction : styles.accessAction}>
           {busy ? <p className={styles.loginLoading} role="status">Aguarde…</p> :
             <button className="primary-action" disabled={action && !actionToken}>
               {mode === 'login' ? 'Entrar' : emailForm ? 'Enviar link' : 'Salvar senha'}
@@ -87,7 +89,7 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
         <Link className={styles.projectCreditsLink} to="/ajuda-acesso">Preciso de ajuda para acessar</Link>
         <Link className={styles.projectCreditsLink} to="/creditos">Conheça quem constrói este projeto</Link>
         <img src="/cps_logo_cor.png" className={styles.logocps} alt="Centro Paula Souza" />
-      </> : <Link to="/login">Voltar ao login</Link>}
+      </> : <Link className={styles.accessBack} to="/login">Voltar ao login</Link>}
       <ErrorModalComp visible={Boolean(error)} error={error} onClose={() => setError('')} />
     </form>
   </AuthLayout>;

@@ -95,6 +95,7 @@ input, select, textarea {
   --app-font: 'Poppins', 'Segoe UI', sans-serif;
   --app-content-width: 820px;
 }
+a { color: var(--app-color-primary); }
 body { color: var(--app-color-text); background: var(--app-color-background); line-height: 1.5; }
 button, input, textarea, select { font-family: inherit; }
 button, [role="button"], input:not([type="hidden"]), select { min-height: 44px; }

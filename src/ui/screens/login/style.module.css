@@ -133,3 +133,8 @@
 @media (prefers-reduced-motion: reduce) {
   .loadingDots > span { animation: none; opacity: 1; }
 }
+
+.accessForm { display: grid; gap: var(--app-space-16); }
+.accessForm > p { color: var(--app-color-muted); }
+.accessAction { width: 100%; }
+.accessBack { justify-self: center; padding: var(--app-space-8); font-weight: 700; }
