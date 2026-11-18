@@ -187,6 +187,8 @@ async function authFlows(page, state) {
       await page.getByLabel('Senha', { exact: true }).fill('FUN-FICTICIA');
       await button(page, 'Entrar').click();
       await heading(page, 'Criar senha pessoal').waitFor();
+      assert(await page.locator('body').evaluate(el => el.scrollWidth <= innerWidth), 'Primeira senha sem rolagem horizontal');
+      await capture(page, 'criar-senha-' + page.viewportSize().width);
       assert.deepEqual(state.calls.slice(requests), [['POST', auth + '/login']]);
       assert.equal(await page.evaluate(key => sessionStorage.getItem(key), sessionStorageKey), null);
     } else {
@@ -334,8 +336,8 @@ try {
     await page.goto(base + '/recuperar-senha');
     await heading(page, 'Recuperar senha').waitFor();
     await capture(page, 'recuperacao-' + viewport.width);
+    await authFlows(page, state);
     if (viewport.width === 1440) {
-      await authFlows(page, state);
       await login(page, 0, 'senha-incorreta');
       await page.getByText('Credenciais inválidas.', { exact: true }).waitFor();
     }

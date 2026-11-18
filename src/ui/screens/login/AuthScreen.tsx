@@ -42,13 +42,14 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
       if (mode === 'login') {
         pendingFirstAccess = undefined;
         const result = await login(email.trim(), password);
+        if (result.profileType !== 'employee') throw new Error('Resposta de login inválida.');
         if (result.mustChangePassword === true && result.firstAccessToken) {
           pendingFirstAccess = result.firstAccessToken;
           setPassword('');
           navigate('/ativar-acesso', { replace: true });
           return;
         }
-        if (result.mustChangePassword !== false || result.profileType !== 'employee' || !result.token) throw new Error('Resposta de login inválida.');
+        if (result.mustChangePassword !== false || !result.token) throw new Error('Resposta de login inválida.');
         setSession(result.token);
         navigate('/', { replace: true });
       } else if (emailForm) {
@@ -101,7 +102,7 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
         <Link className={styles.projectCreditsLink} to="/ajuda-acesso">Preciso de ajuda para acessar</Link>
         <Link className={styles.projectCreditsLink} to="/creditos">Conheça quem constrói este projeto</Link>
         <img src="/cps_logo_cor.png" className={styles.logocps} alt="Centro Paula Souza" />
-      </> : <Link className={styles.accessBack} to="/login">Voltar ao login</Link>}
+      </> : <Link className={styles.accessBack} to="/login" onClick={() => { pendingFirstAccess = undefined; }}>Voltar ao login</Link>}
       <ErrorModalComp visible={Boolean(error)} error={error} onClose={() => setError('')} />
     </form>
   </AuthLayout>;
