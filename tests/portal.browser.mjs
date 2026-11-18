@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { spawn } from 'node:child_process';
+import { preview } from 'vite';
 import { chromium } from 'playwright';
 
 const base = 'http://localhost:4177';
@@ -312,15 +312,10 @@ async function deleteTicket(page) {
   await button(page, 'Nova solicitação').waitFor();
 }
 
-const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--port', '4177', '--strictPort'], { stdio: 'inherit' });
+const server = await preview({ preview: { port: 4177, strictPort: true } });
 let browser;
 try {
   if (evidence) await mkdir(evidence, { recursive: true });
-  for (let attempt = 0; attempt < 80; attempt++) {
-    if (await fetch(base).then(response => response.ok).catch(() => false)) break;
-    if (attempt === 79) throw new Error('O servidor de prévia não iniciou.');
-    await new Promise(resolve => setTimeout(resolve, 250));
-  }
   browser = await chromium.launch(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
     ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } : {});
   for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
@@ -413,5 +408,5 @@ try {
   }
 } finally {
   await browser?.close();
-  server.kill();
+  await new Promise(resolve => server.httpServer.close(resolve));
 }
