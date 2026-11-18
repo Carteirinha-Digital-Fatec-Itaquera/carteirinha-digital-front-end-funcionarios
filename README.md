@@ -24,7 +24,7 @@ Execute o build com `VITE_API_BASE_URL=http://localhost:3099`. Instale o Chromiu
 
 ## Primeiro acesso
 
-Use **Solicitar primeiro acesso** com o e-mail cadastrado pela Secretaria. O portal dá a mesma confirmação para pedidos aceitos, sem confirmar se existe uma conta. A senha e sua confirmação são solicitadas apenas na tela aberta pelo link com token. Após salvar, a tela de login confirma a ativação. Na Home, **Conferir meus dados** mostra os dados já cadastrados; alterações cadastrais seguem pelo suporte. Se não houver foto aprovada, o portal informa como enviar ou acompanhar uma foto.
+Use **Primeiro acesso com matrícula** e informe o e-mail cadastrado pela Secretaria e a matrícula. Contas antigas sem matrícula usam a opção de cadastro legado. Somente a pessoa com acesso à caixa do e-mail cadastrado pode abrir a autorização de ativação. O portal dá a mesma confirmação para pedidos aceitos, sem confirmar se existe uma conta. A senha e sua confirmação são solicitadas apenas na tela aberta pelo link com token. Após salvar, a tela de login confirma a ativação. Na Home, **Conferir meus dados** mostra os dados já cadastrados; alterações cadastrais seguem pelo suporte. Se não houver foto aprovada, o portal informa como enviar ou acompanhar uma foto.
 
 ## Sessão e modo offline
 

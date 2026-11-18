@@ -10,9 +10,9 @@ const auth = '/autenticacao/funcionarios/';
 const self = '/funcionarios/me';
 export const login = (email: string, password: string) =>
   json<EmployeeLoginResponse>(auth + 'login', { method: 'POST', body: { email, password } });
-export const requestAccess = (email: string, recovery: boolean) =>
+export const requestAccess = (email: string, recovery: boolean, registrationNumber?: string) =>
   json<EmployeeGenericAcceptedResponse>(auth + (recovery ? 'forgot-password' : 'solicitar-acesso'),
-    { method: 'POST', body: { email } });
+    { method: 'POST', body: { email, ...(!recovery && registrationNumber ? { registrationNumber } : {}) } });
 export const redeemActionToken = (token: string, newPassword: string, recovery: boolean) =>
   json<EmployeeActivateResponse | EmployeeResetPasswordResponse>(auth + (recovery ? 'reset' : 'ativar'),
     { method: 'POST', body: { token, newPassword } });

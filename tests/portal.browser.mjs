@@ -45,7 +45,8 @@ async function installMock(context) {
         return reply({ token: 'token-teste-' + index, profileType: 'employee', mustChangePassword: false, expiresAt: '2099-01-01T00:00:00Z' });
       }
       if (path.endsWith('solicitar-acesso') || path.endsWith('forgot-password')) {
-        assert.deepEqual(input, { email: input.email });
+        if (path.endsWith('solicitar-acesso')) assert.deepEqual(input, { email: input.email, registrationNumber: 'FUN-FICTICIA' });
+        else assert.deepEqual(input, { email: input.email });
         assert.ok(['pessoa@example.test', 'desconhecido@example.test'].includes(input.email));
         return reply({ accepted: true }, 202);
       }
@@ -180,6 +181,7 @@ async function authFlows(page, state) {
   for (const email of ['pessoa@example.test', 'desconhecido@example.test']) {
     await page.goto(base + '/primeiro-acesso');
     await page.getByLabel('E-mail', { exact: true }).fill(email);
+    await page.getByLabel('Matrícula funcional', { exact: true }).fill('FUN-FICTICIA');
     await button(page, 'Enviar link').click();
     await page.getByText('Se a conta estiver apta, você receberá um link por e-mail.', { exact: true }).waitFor();
   }
@@ -190,6 +192,7 @@ async function authFlows(page, state) {
     await page.goto(base + flow[0]);
     await heading(page, flow[1]).waitFor();
     await page.getByLabel('E-mail', { exact: true }).fill('pessoa@example.test');
+    if (flow[0] === '/primeiro-acesso') await page.getByLabel('Matrícula funcional', { exact: true }).fill('FUN-FICTICIA');
     await button(page, 'Enviar link').click();
     await page.getByText(/receberá um link/).waitFor();
     await page.goto(base + flow[2] + '?token=' + flow[3]);

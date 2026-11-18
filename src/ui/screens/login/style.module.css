@@ -138,3 +138,6 @@
 .accessForm > p { color: var(--app-color-muted); }
 .accessAction { width: 100%; }
 .accessBack { justify-self: center; padding: var(--app-space-8); font-weight: 700; }
+
+.accessForm label > input[type="password"] { display: block; width: 100%; margin-top: 6px; padding: 10px 16px; border: 1px solid var(--app-color-input-border); border-radius: var(--app-radius-control); }
+.accessForm label > input[type="checkbox"] { min-height: auto; margin-inline-end: 6px; }

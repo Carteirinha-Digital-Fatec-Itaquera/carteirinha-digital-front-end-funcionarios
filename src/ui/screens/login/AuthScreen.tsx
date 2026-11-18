@@ -25,6 +25,8 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
     if (action && location.search) history.replaceState(history.state, '', location.pathname);
   }, [action]);
   const [email, setEmail] = useState('');
+  const [registration, setRegistration] = useState('');
+  const [legacy, setLegacy] = useState(false);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
@@ -44,7 +46,8 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
         setSession(result.token);
         navigate('/', { replace: true });
       } else if (emailForm) {
-        await requestAccess(email.trim(), mode === 'recovery');
+        if (mode === 'access' && !legacy && !registration.trim()) throw new Error('Informe sua matrícula funcional.');
+        await requestAccess(email.trim(), mode === 'recovery', legacy ? undefined : registration.trim());
         setNotice('Se a conta estiver apta, você receberá um link por e-mail.');
       } else {
         if (!actionToken) throw new Error('Link inválido. Solicite um novo link.');
@@ -71,11 +74,15 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
       {mode === 'login' && locationState?.reset && <p role="status">Senha redefinida. Entre com a nova senha.</p>}
       {mode === 'login' && locationState?.changedPassword && <p role="status">Senha alterada. Entre com a nova senha.</p>}
       {notice ? <p role="status">{notice}</p> : <>
-        {mode === "access" && <p>Use o e-mail cadastrado pela Secretaria. Se ele estiver apto, você receberá um link para definir sua senha.</p>}
-        {action && actionToken && <p>Escolha uma senha de pelo menos 8 caracteres e confirme no segundo campo.</p>}
+        {mode === "access" && <p>Informe o e-mail cadastrado e a matrícula funcional. Se os dados estiverem aptos, enviaremos um link ao e-mail cadastrado para você definir sua senha pessoal.</p>}
+        {action && actionToken && <p>Escolha uma senha de pelo menos 8 caracteres, diferente da matrícula funcional, e confirme no segundo campo.</p>}
         {mode === "recovery" && <p>Informe seu e-mail para receber as instruções de redefinição.</p>}
         <div className={styles.formFields}>
           {!action && <InputComp label="E-mail" placeholder="Seu e-mail" type="email" value={email} onChangeText={setEmail} />}
+          {mode === 'access' && <>
+            {!legacy && <label>Matrícula funcional<input type="password" maxLength={40} required autoComplete="off" value={registration} onChange={e => setRegistration(e.target.value)} /></label>}
+            <label><input type="checkbox" checked={legacy} onChange={e => setLegacy(e.target.checked)} /> Meu cadastro antigo não tem matrícula</label>
+          </>}
           {!emailForm && (!action || actionToken) && <InputPasswordComp label={action ? 'Nova senha' : 'Senha'} placeholder="Sua senha" autoComplete={action ? "new-password" : "current-password"} value={password} onChangeText={setPassword} />}
           {action && actionToken && <InputPasswordComp label="Confirmar nova senha" placeholder="Repita a senha" autoComplete="new-password" value={confirm} onChangeText={setConfirm} />}
         </div>
@@ -89,7 +96,7 @@ export default function AuthScreen({ mode }: { mode: Mode }) {
         </div>
       </>}
       {mode === 'login' ? <>
-        <Link className={styles.firstAccessNotice} to="/primeiro-acesso">Solicitar primeiro acesso</Link>
+        <Link className={styles.firstAccessNotice} to="/primeiro-acesso">Primeiro acesso com matrícula</Link>
         <Link className={styles.projectCreditsLink} to="/ajuda-acesso">Preciso de ajuda para acessar</Link>
         <Link className={styles.projectCreditsLink} to="/creditos">Conheça quem constrói este projeto</Link>
         <img src="/cps_logo_cor.png" className={styles.logocps} alt="Centro Paula Souza" />
