@@ -1,0 +1,277 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronDown, UsersRound } from "lucide-react";
+import { getProjectCredits } from "../../../api/projectCredits/projectCreditsService";
+import type {
+  ProjectCreditContributor,
+  ProjectCreditsResponse,
+} from "../../../domains/ProjectCredits";
+import { isApprovedProjectCreditHref } from "../../../utils/projectCreditContact";
+import PageLayout from "../../components/page/PageLayout";
+import { groupParticipationPeriods } from "./participationPeriods";
+import styles from "./styleProjectCredits.module.css";
+
+function formatSemester(semester: string): string {
+  const match = /^(\d{4})\.([12])$/.exec(semester);
+  if (!match) return semester;
+  return match[2] + "º sem de " + match[1];
+}
+
+function sortSemesters(semesters: string[]): string[] {
+  return [...new Set(semesters)].sort((left, right) =>
+    right.localeCompare(left),
+  );
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].substring(0, 2).toLocaleUpperCase("pt-BR");
+  return (parts[0][0] + parts[parts.length - 1][0]).toLocaleUpperCase("pt-BR");
+}
+
+function ContributorAvatar({
+  name,
+  photoUrl,
+}: {
+  name: string;
+  photoUrl?: string | null;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const usablePhoto = Boolean(photoUrl?.trim()) && !imageFailed;
+
+  return (
+    <div className={styles.avatar}>
+      {usablePhoto ? (
+        <img
+          className={styles.avatarImage}
+          src={photoUrl!}
+          alt={`Foto de ${name}`}
+          loading="lazy"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <span aria-hidden="true">{getInitials(name)}</span>
+      )}
+    </div>
+  );
+}
+
+function ProjectsCreditsList({
+  contributors,
+  semester,
+}: {
+  contributors: ProjectCreditContributor[];
+  semester: string;
+}) {
+  const visibleContributors = contributors.filter(
+    (person) =>
+      semester === "all" ||
+      person.participations.some(
+        (participation) => participation.semester === semester,
+      ),
+  );
+
+  if (visibleContributors.length === 0) {
+    return (
+      <section className={styles.emptyState} aria-live="polite">
+        <UsersRound size={40} aria-hidden="true" />
+        <h2>Créditos em organização</h2>
+        <p>
+          A lista histórica será publicada depois de validarmos as participações
+          de cada semestre.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <div className={styles.list}>
+      {visibleContributors.map((person) => {
+        const participations = groupParticipationPeriods(
+          person.participations.filter(
+            (participation) =>
+              semester === "all" || participation.semester === semester,
+          ),
+        );
+
+        return (
+          <article className={styles.card} key={person.id}>
+            <ContributorAvatar name={person.name} photoUrl={person.photoUrl} />
+            <div className={styles.cardContent}>
+              <h2>{person.name}</h2>
+              {participations.map((participation) => (
+                <section
+                  className={styles.participation}
+                  key={`${participation.startSemester}-${participation.endSemester}-${participation.roles.join("-")}`}
+                >
+                  <h3>
+                    {formatSemester(participation.startSemester)}
+                    {participation.startSemester !== participation.endSemester &&
+                      ` a ${formatSemester(participation.endSemester)}`}
+                  </h3>
+                  {participation.course && (
+                    <span className={styles.courseText}>
+                      {participation.course}
+                    </span>
+                  )}
+                  <ul className={styles.roles} aria-label="Papéis no projeto">
+                    {participation.roles.map((role) => (
+                      <li key={role}>{role}</li>
+                    ))}
+                  </ul>
+                  {participation.contributions.map((contribution) => (
+                    <p key={contribution}>{contribution}</p>
+                  ))}
+                </section>
+              ))}
+              {person.contacts.some(isApprovedProjectCreditHref) && (
+                <nav
+                  className={styles.contacts}
+                  aria-label={"Contatos profissionais de " + person.name}
+                >
+                  {person.contacts
+                    .filter(isApprovedProjectCreditHref)
+                    .map((contact) => (
+                      <a
+                        key={contact.href}
+                        className={styles.contactLink}
+                        href={contact.href}
+                        {...(contact.kind === "email"
+                          ? {}
+                          : { target: "_blank", rel: "noopener noreferrer" })}
+                      >
+                        {contact.label}
+                      </a>
+                    ))}
+                </nav>
+              )}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function ProjectCreditsScreen() {
+  const location = useLocation();
+  const requestedReturn = (location.state as { from?: unknown } | null)?.from;
+  const backTo =
+    typeof requestedReturn === "string" &&
+    ["/", "/Help"].includes(requestedReturn)
+      ? requestedReturn
+      : "/login";
+  const [resource, setResource] = useState<ProjectCreditsResponse | null>(null);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void getProjectCredits(controller.signal)
+      .then((response) => {
+        if (!controller.signal.aborted) setResource(response);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [attempt]);
+
+  const semesters = useMemo(
+    () =>
+      sortSemesters(
+        (resource?.contributors ?? []).flatMap((person) =>
+          person.participations.map((item) => item.semester),
+        ),
+      ),
+    [resource],
+  );
+  const [semester, setSemester] = useState("all");
+  const retry = () => {
+    setLoading(true);
+    setError(false);
+    setAttempt((current) => current + 1);
+  };
+
+  return (
+    <PageLayout
+      title="Créditos do projeto"
+      subtitle="Cada semestre deixa sua marca na Carteirinha Digital. Conheça quem ajudou a construir este projeto."
+      icon={<UsersRound size={22} aria-hidden="true" />}
+      backTo={backTo}
+      backLabel={backTo === "/login" ? "Voltar para o login" : "Voltar"}
+      roundedHeader
+    >
+      <section
+        className={styles.headingSurface}
+        aria-labelledby="credits-history-title"
+      >
+        <div className={styles.heading}>
+          <div>
+            <span
+              className={
+                styles.sectionEyebrow
+              }
+            >
+              Nossa história
+            </span>
+            <h2 id="credits-history-title">Quem constrói o projeto</h2>
+          </div>
+          <p>
+            Reconhecemos pessoas e contribuições de diferentes etapas do
+            projeto.
+          </p>
+        </div>
+      </section>
+
+      {semesters.length > 0 && (
+        <div className={styles.filters}>
+          <label className={styles.visuallyHidden} htmlFor="credits-semester-filter">
+            Filtrar créditos por semestre
+          </label>
+          <div className={styles.selectWrapper}>
+            <select
+              id="credits-semester-filter"
+              className={styles.semesterSelect}
+              value={semester}
+              onChange={(event) => setSemester(event.target.value)}
+            >
+              <option value="all">Todos os semestres</option>
+              {semesters.map((value) => (
+                <option key={value} value={value}>
+                  {formatSemester(value)}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className={styles.selectArrow} size={20} aria-hidden="true" />
+          </div>
+        </div>
+      )}
+
+      {loading ? (
+        <p role="status">Carregando créditos do projeto...</p>
+      ) : error ? (
+        <div role="alert">Não foi possível carregar os créditos. <button onClick={retry}>Tentar novamente</button></div>
+      ) : (
+        <ProjectsCreditsList
+          contributors={resource?.contributors ?? []}
+          semester={semester}
+        />
+      )}
+
+      <p className={styles.footerNote}>
+        Quer atualizar sua participação ou compartilhar um contato profissional?
+        A equipe confirma cada informação antes da publicação.
+      </p>
+      <Link className={styles.homeLink} to="/login">
+        Carteirinha Digital FATEC Itaquera
+      </Link>
+    </PageLayout>
+  );
+}
