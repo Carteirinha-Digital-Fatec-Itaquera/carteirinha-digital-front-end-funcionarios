@@ -189,7 +189,7 @@ async function authFlows(page, state) {
       await heading(page, 'Criar senha pessoal').waitFor();
       assert(await page.locator('body').evaluate(el => el.scrollWidth <= innerWidth), 'Primeira senha sem rolagem horizontal');
       await capture(page, 'criar-senha-' + page.viewportSize().width);
-      assert.deepEqual(state.calls.slice(requests), [['POST', auth + '/login']]);
+      assert.deepEqual(state.calls.slice(requests), [['POST', auth + 'login']]);
       assert.equal(await page.evaluate(key => sessionStorage.getItem(key), sessionStorageKey), null);
     } else {
       await button(page, 'Enviar link').click();
