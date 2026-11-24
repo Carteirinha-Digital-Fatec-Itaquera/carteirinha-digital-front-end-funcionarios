@@ -1,11 +1,12 @@
-import { CircleCheckBig, CircleX, Info, TriangleAlert } from 'lucide-react';
-import Modal from '../modal/Modal';
-import styles from './style.module.css';
+import { CircleCheckBig, CircleX, Info, TriangleAlert } from "lucide-react";
+import Modal from "../modal/Modal";
+import styles from "./style.module.css";
 
-export type MessageTone = 'success' | 'info' | 'warning' | 'error';
+export type MessageTone = "success" | "info" | "warning" | "error";
 
 type Props = {
   visible: boolean;
+  destructive?: boolean;
   tone?: MessageTone;
   title: string;
   message: string;
@@ -25,11 +26,12 @@ const iconByTone = {
 
 export default function MessageModal({
   visible,
-  tone = 'info',
+  destructive = false,
+  tone = "info",
   title,
   message,
   details = [],
-  confirmText = 'OK',
+  confirmText = "OK",
   cancelText,
   onConfirm,
   onCancel,
@@ -68,12 +70,22 @@ export default function MessageModal({
 
         <div className={styles.actions}>
           {cancelText && onCancel && (
-            <button type="button" className={styles.secondaryButton} onClick={onCancel}>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              onClick={onCancel}
+              autoFocus={destructive}
+            >
               {cancelText}
             </button>
           )}
 
-          <button type="button" className={styles.primaryButton} onClick={onConfirm} autoFocus>
+          <button
+            type="button"
+            className={destructive ? styles.dangerButton : styles.primaryButton}
+            onClick={onConfirm}
+            autoFocus={!destructive}
+          >
             {confirmText}
           </button>
         </div>

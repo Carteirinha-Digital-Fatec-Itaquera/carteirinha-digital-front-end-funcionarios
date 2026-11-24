@@ -1,9 +1,98 @@
-
-.container { display: flex; flex-direction: column; align-items: center; padding: 32px; border: 1px solid var(--app-color-border); border-radius: var(--app-radius-card); background: var(--app-color-surface); box-shadow: var(--app-shadow); }
-.box { width: min(100%, 270px); aspect-ratio: 3/4; display: grid; place-items: center; overflow: hidden; border: 2px dashed var(--app-color-input-border); border-radius: 16px; background: var(--app-color-background); }
-.placeholderImage { width: 120px; max-width: 100%; height: auto; object-fit: contain; }
-.userImage { width: 100%; height: 100%; object-fit: cover; }
-.button { composes: button from '../../components/button/style.module.css'; min-width: 0; padding: 12px; }
-@media(max-width:540px) { .container { padding: 24px 16px; } }
-
-.container { gap: var(--app-space-12); }
+.container {
+  display: grid;
+  grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
+  gap: 40px;
+  padding: 32px;
+  border: 1px solid var(--app-color-border);
+  border-radius: 24px;
+  background: var(--app-color-surface);
+  box-shadow: var(--app-shadow);
+}
+.previewColumn {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.box {
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 3/4;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--app-color-border);
+  border-radius: 18px;
+  background: var(--app-color-background);
+}
+.placeholderImage {
+  width: 110px;
+  max-width: 100%;
+  object-fit: contain;
+}
+.userImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+.controls h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.controls p {
+  margin: 0;
+  line-height: 1.6;
+}
+.photoStatus {
+  background: var(--app-color-primary-soft);
+  color: var(--app-color-primary);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.button {
+  composes: button from "../../components/button/style.module.css";
+  min-width: 0;
+  padding: 12px;
+}
+.maintenance {
+  border-top: 1px solid var(--app-color-border);
+  padding-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+.remove {
+  background: transparent;
+  border: 1px solid var(--app-color-danger);
+  color: var(--app-color-danger);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 600;
+  min-height: 44px;
+  cursor: pointer;
+}
+.remove:focus-visible {
+  outline: 3px solid var(--app-color-primary);
+  outline-offset: 3px;
+}
+@media (max-width: 640px) {
+  .container {
+    grid-template-columns: 1fr;
+    padding: 24px 20px;
+    gap: 24px;
+  }
+  .box {
+    max-width: 210px;
+  }
+  .maintenance {
+    flex-direction: column;
+  }
+}
