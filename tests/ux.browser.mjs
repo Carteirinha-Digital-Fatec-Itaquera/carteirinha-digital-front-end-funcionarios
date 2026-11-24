@@ -38,6 +38,8 @@ try {
     { width: 390, height: 844 },
     { width: 1440, height: 900 },
   ]) {
+    if (process.env.UX_WIDTH && viewport.width !== Number(process.env.UX_WIDTH))
+      continue;
     const context = await browser.newContext({
       viewport,
       serviceWorkers: "block",
@@ -425,6 +427,9 @@ try {
     assert.equal(await page.locator('img[src^="blob:"]').count(), 1);
     await capture("home-api-indisponivel");
     await page.getByRole("button", { name: "Minha Carteirinha" }).click();
+    await page
+      .getByRole("heading", { name: "Carteirinha", exact: true })
+      .waitFor();
     await page
       .getByRole("alert")
       .filter({ hasText: /Não foi possível conectar/ })
