@@ -28,3 +28,7 @@ CPF e código de barras não estão disponíveis como campos destinados à carte
 As investigações técnicas constam no relatório entregue com o PR. A fila de fotos da Secretaria consulta somente alunos, embora o backend possua uma fila de funcionários. PHOTO_PENDING bloqueia o QR por regra de elegibilidade. Nenhuma dessas regras foi alterada nesta entrega. O teste simulado não equivale à homologação de Cloudinary, banco ou fluxo real da Secretaria.
 
 O PR permanece Draft para avaliação visual e funcional da equipe.
+
+## Resultados
+
+Lint e build aprovados. Playwright aprovado em 390×844, 768×1024 e 1440×900 com API simulada. O roteiro cobre bloqueio de envio duplicado no login, campos preservados após erro, movimento reduzido, foco e cancelamento dos modais, descarte, substituição, remoção e atualização da fotografia, contatos e Maps, navegação, carteirinha, QR, sessão e solicitações. As capturas da execução ficam em docs/evidencias-ux.
