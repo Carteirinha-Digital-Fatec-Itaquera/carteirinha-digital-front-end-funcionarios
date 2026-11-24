@@ -7,93 +7,93 @@ export type Uuid = string;
 export type IsoDate = string; // YYYY-MM-DD (America/Sao_Paulo)
 export type IsoDateTime = string; // ISO-8601 UTC/offset
 
-export type EmployeeAccountStatus = 'ACTIVE' | 'BLOCKED' | 'ARCHIVED';
+export type EmployeeAccountStatus = "ACTIVE" | "BLOCKED" | "ARCHIVED";
 export type EmployeeAssignmentEffectiveStatus =
-  | 'ACTIVE'
-  | 'FUTURE'
-  | 'EXPIRED'
-  | 'ENDED'
-  | 'ARCHIVED';
+  | "ACTIVE"
+  | "FUTURE"
+  | "EXPIRED"
+  | "ENDED"
+  | "ARCHIVED";
 
 export type EmployeeValidityKind =
-  | 'INDETERMINATE'
-  | 'UNTIL_DATE'
-  | 'NO_ACTIVE_ASSIGNMENT';
+  | "INDETERMINATE"
+  | "UNTIL_DATE"
+  | "NO_ACTIVE_ASSIGNMENT";
 
 export type EmployeeCredentialReasonCode =
-  | 'ACCOUNT_BLOCKED'
-  | 'ACCOUNT_ARCHIVED'
-  | 'ADMISSION_FUTURE'
-  | 'NO_ACTIVE_ASSIGNMENT'
-  | 'PHOTO_PENDING'
-  | 'PHOTO_REJECTED'
-  | 'PHOTO_MISSING';
+  | "ACCOUNT_BLOCKED"
+  | "ACCOUNT_ARCHIVED"
+  | "ADMISSION_FUTURE"
+  | "NO_ACTIVE_ASSIGNMENT"
+  | "PHOTO_PENDING"
+  | "PHOTO_REJECTED"
+  | "PHOTO_MISSING";
 
-export type EmployeePhotoReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type EmployeePhotoReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type EmployeePhotoProcessingState =
-  | 'UPLOADING'
-  | 'READY'
-  | 'FAILED'
-  | 'DELETE_PENDING'
-  | 'DELETED';
+  | "UPLOADING"
+  | "READY"
+  | "FAILED"
+  | "DELETE_PENDING"
+  | "DELETED";
 
 export type EmployeeTokenDeliveryState =
-  | 'PENDING'
-  | 'ACCEPTED'
-  | 'FAILED'
-  | 'UNKNOWN';
+  | "PENDING"
+  | "ACCEPTED"
+  | "FAILED"
+  | "UNKNOWN";
 
-export type EmployeeImportMode = 'CREATE_ONLY' | 'UPDATE';
+export type EmployeeImportMode = "CREATE_ONLY" | "UPDATE";
 export type EmployeeImportBatchState =
-  | 'ANALYZED'
-  | 'RUNNING'
-  | 'COMPLETED'
-  | 'PARTIAL'
-  | 'CANCELLED'
-  | 'EXPIRED';
+  | "ANALYZED"
+  | "RUNNING"
+  | "COMPLETED"
+  | "PARTIAL"
+  | "CANCELLED"
+  | "EXPIRED";
 
 export type EmployeeImportRowDecision =
-  | 'READY_CREATE'
-  | 'READY_UPDATE'
-  | 'EXISTS'
-  | 'INVALID'
-  | 'AMBIGUOUS';
+  | "READY_CREATE"
+  | "READY_UPDATE"
+  | "EXISTS"
+  | "INVALID"
+  | "AMBIGUOUS";
 
 export type EmployeeImportRowState =
-  | 'PENDING'
-  | 'RUNNING'
-  | 'SUCCEEDED'
-  | 'FAILED'
-  | 'CANCELLED'
-  | 'STALE';
+  | "PENDING"
+  | "RUNNING"
+  | "SUCCEEDED"
+  | "FAILED"
+  | "CANCELLED"
+  | "STALE";
 
 export type EmployeeApiErrorCode =
-  | 'VALIDATION_ERROR'
-  | 'IMPORT_SCHEMA_INVALID'
-  | 'DATE_RANGE_INVALID'
-  | 'TOKEN_INVALID_OR_EXPIRED'
-  | 'LOCATION_REQUIRED'
-  | 'UNAUTHORIZED'
-  | 'SESSION_REVOKED'
-  | 'OFFLINE_SESSION_REQUIRED'
-  | 'ROLE_FORBIDDEN'
-  | 'ACCOUNT_BLOCKED'
-  | 'NO_ACTIVE_ASSIGNMENT'
-  | 'ORIGIN_MISMATCH'
-  | 'EMPLOYEE_NOT_FOUND'
-  | 'PHOTO_NOT_FOUND'
-  | 'QR_NOT_FOUND'
-  | 'EMAIL_ALREADY_EXISTS'
-  | 'REGISTRATION_ALREADY_EXISTS'
-  | 'VERSION_CONFLICT'
-  | 'REQUEST_ID_REUSED'
-  | 'PHOTO_VERSION_CONFLICT'
-  | 'IMPORT_REVIEW_CHANGED'
-  | 'IMPORT_ROW_STALE'
-  | 'FILE_TOO_LARGE'
-  | 'FILE_TYPE_NOT_ALLOWED'
-  | 'RATE_LIMITED'
-  | 'STORAGE_UNAVAILABLE';
+  | "VALIDATION_ERROR"
+  | "IMPORT_SCHEMA_INVALID"
+  | "DATE_RANGE_INVALID"
+  | "TOKEN_INVALID_OR_EXPIRED"
+  | "LOCATION_REQUIRED"
+  | "UNAUTHORIZED"
+  | "SESSION_REVOKED"
+  | "OFFLINE_SESSION_REQUIRED"
+  | "ROLE_FORBIDDEN"
+  | "ACCOUNT_BLOCKED"
+  | "NO_ACTIVE_ASSIGNMENT"
+  | "ORIGIN_MISMATCH"
+  | "EMPLOYEE_NOT_FOUND"
+  | "PHOTO_NOT_FOUND"
+  | "QR_NOT_FOUND"
+  | "EMAIL_ALREADY_EXISTS"
+  | "REGISTRATION_ALREADY_EXISTS"
+  | "VERSION_CONFLICT"
+  | "REQUEST_ID_REUSED"
+  | "PHOTO_VERSION_CONFLICT"
+  | "IMPORT_REVIEW_CHANGED"
+  | "IMPORT_ROW_STALE"
+  | "FILE_TOO_LARGE"
+  | "FILE_TYPE_NOT_ALLOWED"
+  | "RATE_LIMITED"
+  | "STORAGE_UNAVAILABLE";
 
 export interface EmployeeErrorEnvelope {
   statusCode: number;
@@ -120,8 +120,18 @@ export interface EmployeeLoginRequest {
 }
 
 export type EmployeeLoginResponse =
-  | { token: string; mustChangePassword: false; profileType: 'employee'; expiresAt: IsoDateTime }
-  | { firstAccessToken: string; mustChangePassword: true; profileType: 'employee'; expiresAt: IsoDateTime };
+  | {
+      token: string;
+      mustChangePassword: false;
+      profileType: "employee";
+      expiresAt: IsoDateTime;
+    }
+  | {
+      firstAccessToken: string;
+      mustChangePassword: true;
+      profileType: "employee";
+      expiresAt: IsoDateTime;
+    };
 
 export interface EmployeeRequestAccessRequest {
   email: string;
@@ -178,7 +188,7 @@ export interface EmployeeInviteResponse {
 
 export interface EmployeeAccessStatusResponse {
   passwordDefined: boolean;
-  firstAccessMethod?: 'REGISTRATION' | 'REGISTRATION_REQUIRED' | null;
+  firstAccessMethod?: "REGISTRATION" | "REGISTRATION_REQUIRED" | null;
   lastLoginAt: IsoDateTime | null;
   lastAccessRequestAt: IsoDateTime | null;
   lastDeliveryState: EmployeeTokenDeliveryState | null;
@@ -218,7 +228,15 @@ export interface EmployeeCredentialSummary {
   checkedAt: IsoDateTime;
 }
 
+export interface EmployeePhotoAttemptView {
+  photoId: Uuid;
+  reviewStatus: EmployeePhotoReviewStatus;
+  reviewReason: string | null;
+  reviewedAt: IsoDateTime | null;
+}
+
 export interface EmployeePhotoSummary {
+  latestAttempt?: EmployeePhotoAttemptView | null;
   approvedPhotoId: Uuid | null;
   pendingPhotoId: Uuid | null;
   reviewStatus: EmployeePhotoReviewStatus | null;
@@ -228,7 +246,7 @@ export interface EmployeePhotoSummary {
 export interface EmployeeProfileView {
   id: Uuid;
   accountId: Uuid;
-  profileType: 'EMPLOYEE';
+  profileType: "EMPLOYEE";
   name: string;
   socialName: string | null;
   displayName: string;
@@ -246,7 +264,7 @@ export interface EmployeeProfileView {
 export interface EmployeeCredentialCardView {
   id: Uuid;
   accountId: Uuid;
-  profileType: 'EMPLOYEE';
+  profileType: "EMPLOYEE";
   institutionName: string;
   displayName: string;
   registrationNumber: string | null;
@@ -265,9 +283,10 @@ export interface EmployeeCredentialCardView {
 }
 
 export interface EmployeePhotoStatusView {
+  latestAttempt?: EmployeePhotoAttemptView | null;
   approved: {
     id: Uuid;
-    reviewStatus: 'APPROVED';
+    reviewStatus: "APPROVED";
     contentUrl: string;
     reviewedAt: IsoDateTime | null;
   } | null;
@@ -284,8 +303,8 @@ export interface EmployeePhotoStatusView {
 
 export interface EmployeePhotoUploadResponse {
   photoId: Uuid;
-  reviewStatus: 'PENDING';
-  processingState: 'READY';
+  reviewStatus: "PENDING";
+  processingState: "READY";
   version: number;
 }
 
@@ -366,7 +385,7 @@ export interface UpdateEmployeeRequest {
 export interface UpdateEmployeeStatusRequest {
   expectedVersion: number;
   reason: string;
-  status: 'ACTIVE' | 'BLOCKED';
+  status: "ACTIVE" | "BLOCKED";
 }
 
 export interface EmployeeReasonMutationRequest {
@@ -414,7 +433,7 @@ export interface EmployeeAssignmentMutationResponse {
 
 export interface EmployeeAuditItemView {
   id: Uuid;
-  actorRole: 'employee' | 'secretary' | 'system';
+  actorRole: "employee" | "secretary" | "system";
   actorId: string;
   action: string;
   requestId: string;
@@ -457,8 +476,8 @@ export interface EmployeeHistoryView {
 // ==========================================
 
 export interface EmployeeImportTemplateMetadata {
-  schemaVersion: '1.0';
-  sheetName: 'Funcionarios';
+  schemaVersion: "1.0";
+  sheetName: "Funcionarios";
   maxFileSizeBytes: number;
   maxRows: number;
   columns: string[];
@@ -539,10 +558,10 @@ export interface ReprocessEmployeeImportRequest {
 
 export interface PublicEmployeeVerificationValid {
   valid: true;
-  profileType: 'EMPLOYEE';
+  profileType: "EMPLOYEE";
   displayName: string;
   activeAssignments: Array<{ title: string }>;
-  validityKind: 'INDETERMINATE' | 'UNTIL_DATE';
+  validityKind: "INDETERMINATE" | "UNTIL_DATE";
   validUntil: IsoDate | null;
   photoUrl: string | null;
   checkedAt: IsoDateTime;
@@ -550,7 +569,7 @@ export interface PublicEmployeeVerificationValid {
 
 export interface PublicEmployeeVerificationInvalid {
   valid: false;
-  profileType: 'EMPLOYEE';
+  profileType: "EMPLOYEE";
   reasonCode: EmployeeCredentialReasonCode;
   checkedAt: IsoDateTime;
 }
@@ -610,7 +629,7 @@ export interface EmployeeOfflineStatusResponse {
 
 export interface ManualEmployeeCertificateRequest {
   requestId: Uuid;
-  identityType: 'EMPLOYEE';
+  identityType: "EMPLOYEE";
   employeeId: Uuid;
   expectedAccountId: Uuid;
   participationConfirmed: true;
@@ -618,7 +637,7 @@ export interface ManualEmployeeCertificateRequest {
 }
 
 export interface CertificateRecipientEmployee {
-  type: 'EMPLOYEE';
+  type: "EMPLOYEE";
   displayName: string;
   registrationNumber: string | null;
 }

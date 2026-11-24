@@ -187,6 +187,14 @@ async function installMock(context) {
       return reply({
         approved: activePhoto,
         pending: state.pending,
+        latestAttempt: state.rejected
+          ? {
+              photoId: photoId(99),
+              reviewStatus: "REJECTED",
+              reviewReason: "Enquadramento insuficiente.",
+              reviewedAt: "2026-11-23T12:00:00Z",
+            }
+          : null,
         version: state.photoVersion,
       });
     }
@@ -540,6 +548,20 @@ async function photoFlows(page, state) {
   state.rejected = true;
   await page.reload();
   await page.getByText("A foto não foi aprovada.", { exact: true }).waitFor();
+  await page
+    .getByText("Enquadramento insuficiente.", { exact: true })
+    .waitFor();
+  state.photos[0] = approved(4);
+  await page.reload();
+  await page
+    .getByText(
+      "A última foto enviada foi rejeitada. Sua foto aprovada anteriormente continua na carteirinha.",
+      { exact: true },
+    )
+    .waitFor();
+  await page
+    .getByText("Enquadramento insuficiente.", { exact: true })
+    .waitFor();
 }
 
 async function supportFlows(page, state) {
@@ -648,7 +670,15 @@ try {
     await loadingButton.waitFor();
     assert(await loadingButton.isDisabled());
     await page.emulateMedia({ reducedMotion: "reduce" });
-    assert(await loadingButton.locator('span[aria-hidden] span').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).animationName === "none")));
+    assert(
+      await loadingButton
+        .locator("span[aria-hidden] span")
+        .evaluateAll((nodes) =>
+          nodes.every(
+            (node) => getComputedStyle(node).animationName === "none",
+          ),
+        ),
+    );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.getByLabel("Senha", { exact: true }).press("Enter");
     assert.equal(state.calls.length - beforeLogin, 1);
@@ -702,27 +732,49 @@ try {
       await page.waitForLoadState("networkidle");
       await capture(page, name + "-" + viewport.width);
       if (path === "/foto") {
-        await button(page, 'Remover foto').click();
-        await page.getByRole('dialog', { name: 'Remover foto?' }).waitFor();
-        assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Cancelar');
-        await capture(page, 'modal-remover-foto-' + viewport.width);
-        await page.keyboard.press('Escape');
-        await page.getByRole('dialog').waitFor({ state: 'hidden' });
-        const galleryInput = page.locator('input[type=file]:not([capture])');
-        await galleryInput.setInputFiles({ name: 'ficticia.png', mimeType: 'image/png', buffer: picture });
-        await page.getByRole('img', { name: 'Prévia da nova foto' }).waitFor();
-        await button(page, 'Descartar prévia').click();
-        await capture(page, 'modal-descartar-previa-' + viewport.width);
-        await button(page, 'Cancelar').click();
-        await page.getByRole('img', { name: 'Prévia da nova foto' }).waitFor();
-        await button(page, 'Descartar prévia').click();
-        await button(page, 'Descartar').click();
-        assert.equal(await page.getByRole('img', { name: 'Prévia da nova foto' }).count(), 0);
+        await button(page, "Remover foto").click();
+        await page.getByRole("dialog", { name: "Remover foto?" }).waitFor();
+        assert.equal(
+          await page.evaluate(() => document.activeElement?.textContent),
+          "Cancelar",
+        );
+        await capture(page, "modal-remover-foto-" + viewport.width);
+        await page.keyboard.press("Escape");
+        await page.getByRole("dialog").waitFor({ state: "hidden" });
+        const galleryInput = page.locator("input[type=file]:not([capture])");
+        await galleryInput.setInputFiles({
+          name: "ficticia.png",
+          mimeType: "image/png",
+          buffer: picture,
+        });
+        await page.getByRole("img", { name: "Prévia da nova foto" }).waitFor();
+        await button(page, "Descartar prévia").click();
+        await capture(page, "modal-descartar-previa-" + viewport.width);
+        await button(page, "Cancelar").click();
+        await page.getByRole("img", { name: "Prévia da nova foto" }).waitFor();
+        await button(page, "Descartar prévia").click();
+        await button(page, "Descartar").click();
+        assert.equal(
+          await page.getByRole("img", { name: "Prévia da nova foto" }).count(),
+          0,
+        );
       }
       if (path === "/unidade") {
-        assert.equal(await page.getByRole('link', { name: '(11) 98787-7625', exact: true }).first().getAttribute('href'), 'https://wa.me/5511987877625');
-        await page.getByText('Seg - Sex, 8h às 18h', { exact: true }).waitFor();
-        assert((await page.getByRole('link', { name: /Endereço fictício/ }).getAttribute('href')).startsWith('https://www.google.com/maps/search/'));
+        assert.equal(
+          await page
+            .getByRole("link", { name: "(11) 98787-7625", exact: true })
+            .first()
+            .getAttribute("href"),
+          "https://wa.me/5511987877625",
+        );
+        await page.getByText("Seg - Sex, 8h às 18h", { exact: true }).waitFor();
+        assert(
+          (
+            await page
+              .getByRole("link", { name: /Endereço fictício/ })
+              .getAttribute("href")
+          ).startsWith("https://www.google.com/maps/search/"),
+        );
       }
       if (path === "/config") {
         await page
