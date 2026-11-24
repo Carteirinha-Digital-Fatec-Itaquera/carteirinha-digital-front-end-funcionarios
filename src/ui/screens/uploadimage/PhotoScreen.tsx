@@ -31,6 +31,7 @@ export default function PhotoScreen() {
   const pendingUrl = usePhotoUrl(pending?.contentUrl);
   const approvedUrl = usePhotoUrl(approved?.contentUrl);
   const rejected =
+    photo.data?.latestAttempt?.reviewStatus === "REJECTED" ||
     profile.data?.credential.reasonCode === "PHOTO_REJECTED" ||
     pending?.reviewStatus === "REJECTED";
 
@@ -125,7 +126,22 @@ export default function PhotoScreen() {
                     : "Nenhuma foto em análise ou aprovada."}
             </p>
           )}
-          {pending?.reviewReason && <p>{pending.reviewReason}</p>}
+          {(pending?.reviewReason ||
+            (rejected && photo.data?.latestAttempt?.reviewReason) ||
+            (rejected && profile.data?.photo.reviewReason)) && (
+            <p role="status">
+              {pending?.reviewReason ||
+                photo.data?.latestAttempt?.reviewReason ||
+                profile.data?.photo.reviewReason}
+            </p>
+          )}
+          {pending && approved && <p>Uma nova foto aguarda análise. Sua foto aprovada continua na carteirinha.</p>}
+          {rejected && approved && (
+            <p>
+              A última foto enviada foi rejeitada. Sua foto aprovada
+              anteriormente continua na carteirinha.
+            </p>
+          )}
           <p>
             Escolha uma imagem com fundo neutro e rosto visível. A foto será
             avaliada pela Secretaria.
