@@ -323,7 +323,9 @@ export function Institution({ embedded = false }: { embedded?: boolean }) {
       <Status {...result} />
       {unit && (
         <section className={help.contentWrapper}>
-          <p className={help.faleConoscoLabel}>{unit.shortName}</p>
+          {unit.shortName !== unit.name && (
+            <p className={help.faleConoscoLabel}>{unit.shortName}</p>
+          )}
           <h2 className={help.unitName}>{unit.name}</h2>
           <h3 className={help.mainTitle}>Contatos</h3>
           <div className={help.contactList}>

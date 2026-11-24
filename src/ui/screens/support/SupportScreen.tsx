@@ -707,6 +707,7 @@ export default function SupportScreen() {
       />
       <MessageModal
         visible={dangerAction !== null}
+        destructive
         tone="warning"
         title={
           dangerAction === "delete"

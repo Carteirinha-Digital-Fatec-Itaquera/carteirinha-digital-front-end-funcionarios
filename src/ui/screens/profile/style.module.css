@@ -91,3 +91,8 @@
     font-size: 1.25rem;
   }
 }
+
+.panel h3 {
+  margin: 26px 0 12px;
+  font-size: 1rem;
+}
