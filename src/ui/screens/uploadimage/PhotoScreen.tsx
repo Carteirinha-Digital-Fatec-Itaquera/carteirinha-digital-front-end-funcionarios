@@ -101,7 +101,6 @@ export default function PhotoScreen() {
       backTo="/"
       roundedHeader
     >
-      <Status {...photo} />
       <div className={styles.container}>
         <div className={styles.previewColumn}>
           <div className={styles.box}>
@@ -114,6 +113,7 @@ export default function PhotoScreen() {
         </div>
         <div className={styles.controls}>
           <h2>Foto da carteirinha</h2>
+          <Status {...photo} />
           {photo.data && (
             <p className={styles.photoStatus} role="status">
               {pending?.reviewStatus === "PENDING"
