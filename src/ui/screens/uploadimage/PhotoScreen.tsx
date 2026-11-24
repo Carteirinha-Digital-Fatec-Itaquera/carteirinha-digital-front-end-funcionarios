@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { ApiError } from "../../../api/config/apiClient";
 import {
+  getCard,
   getPhoto,
   getProfile,
   removePhoto,
   uploadPhoto,
 } from "../../../api/employee";
+import { invalidateResources } from "../../../resourceCache";
 import { usePhotoUrl, useResource } from "../../../hooks";
 import { compressImage } from "../../../utils/imageProcessing";
 import MessageModal from "../../components/MessageModal/MessageModal";
@@ -75,6 +77,7 @@ export default function PhotoScreen() {
         });
       else if (draft)
         await uploadPhoto(draft.file, photo.data.version, draft.id);
+      invalidateResources([getPhoto, getProfile, getCard]);
       setDraft(undefined);
       setNotice(
         remove ? "Foto removida." : "Foto recebida e encaminhada para análise.",
@@ -93,7 +96,11 @@ export default function PhotoScreen() {
     }
   }
 
-  const refreshing = photo.loading || profile.loading;
+  const refreshing =
+    photo.loading ||
+    profile.loading ||
+    !!photo.refreshing ||
+    !!profile.refreshing;
   const preview = draft?.url || pendingUrl || approvedUrl;
   return (
     <PageLayout
@@ -135,7 +142,12 @@ export default function PhotoScreen() {
                 profile.data?.photo.reviewReason}
             </p>
           )}
-          {pending && approved && <p>Uma nova foto aguarda análise. Sua foto aprovada continua na carteirinha.</p>}
+          {pending && approved && (
+            <p>
+              Uma nova foto aguarda análise. Sua foto aprovada continua na
+              carteirinha.
+            </p>
+          )}
           {rejected && approved && (
             <p>
               A última foto enviada foi rejeitada. Sua foto aprovada

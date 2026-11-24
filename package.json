@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:browser": "node tests/portal.browser.mjs"
+    "test:browser": "node tests/portal.browser.mjs",
+    "test:cache": "node --test tests/cache.test.mjs",
+    "test:ux": "node tests/ux.browser.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.8.0",

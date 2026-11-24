@@ -1,0 +1,35 @@
+{
+  "condition": "API simulada com 150 ms por chamada; uma amostra por largura",
+  "main": [
+    {
+      "viewport": 390,
+      "mode": "main",
+      "initialProfileAndPhoto": 3,
+      "navigationPrivateRequests": 4,
+      "navigationMs": 492
+    },
+    {
+      "viewport": 1440,
+      "mode": "main",
+      "initialProfileAndPhoto": 3,
+      "navigationPrivateRequests": 4,
+      "navigationMs": 552
+    }
+  ],
+  "branch": [
+    {
+      "viewport": 390,
+      "mode": "branch",
+      "initialProfileAndPhoto": 2,
+      "navigationPrivateRequests": 0,
+      "navigationMs": 145
+    },
+    {
+      "viewport": 1440,
+      "mode": "branch",
+      "initialProfileAndPhoto": 2,
+      "navigationPrivateRequests": 0,
+      "navigationMs": 124
+    }
+  ]
+}

@@ -70,7 +70,7 @@ export function CardScreen() {
         <Status {...result} />
       </PageLayout>
     );
-  const validationUrl = verificationUrl(card.verificationUrl);
+  const validationUrl = !result.error && verificationUrl(card.verificationUrl);
   return (
     <main className={styles.container}>
       <header className={styles.header}>
@@ -83,6 +83,7 @@ export function CardScreen() {
       </header>
       <div className={styles.content}>
         <InternetWatcher />
+        <Status {...result} />
         <div className={styles.cardStage}>
           <article
             className={styles.card}
@@ -104,19 +105,29 @@ export function CardScreen() {
                 <div className={styles.frontBody}>
                   <dl className={styles.frontData}>
                     <div>
-                      <dt>Nome</dt>
-                      <dd className={styles.name}>{card.displayName}</dd>
+                      <dt>NOME:</dt>
+                      <dd className={styles.name}>
+                        {card.displayName.toLocaleUpperCase("pt-BR")}
+                      </dd>
                     </div>
                     <div>
-                      <dt>Unidade</dt>
-                      <dd>{card.institutionName}</dd>
+                      <dt>UNIDADE:</dt>
+                      <dd>{card.institutionName.toLocaleUpperCase("pt-BR")}</dd>
                     </div>
                     <div>
-                      <dt>Função</dt>
+                      <dt>FUNÇÃO:</dt>
                       <dd>
-                        {card.activeAssignments
-                          .map((item) => item.title)
-                          .join(" · ") || "Nenhuma função vigente"}
+                        {card.activeAssignments.length ? (
+                          <ul className={styles.functions}>
+                            {card.activeAssignments.map((item) => (
+                              <li key={item.id}>
+                                {item.title.toLocaleUpperCase("pt-BR")}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          "NENHUMA FUNÇÃO VIGENTE"
+                        )}
                       </dd>
                     </div>
                   </dl>
@@ -200,17 +211,28 @@ export function CardScreen() {
             )}
           </article>
         </div>
-        <button
-          className={styles.flipButton}
-          onClick={() => setShowBack(!showBack)}
-          aria-label={
-            showBack
-              ? "Mostrar frente da carteirinha"
-              : "Mostrar verso da carteirinha"
-          }
+        <div
+          className={styles.sideControl}
+          role="group"
+          aria-label="Lado da carteirinha"
         >
-          {showBack ? "Mostrar frente" : "Mostrar verso"}
-        </button>
+          <button
+            type="button"
+            aria-label="Mostrar frente da carteirinha"
+            aria-pressed={!showBack}
+            onClick={() => setShowBack(false)}
+          >
+            Frente
+          </button>
+          <button
+            type="button"
+            aria-label="Mostrar verso da carteirinha"
+            aria-pressed={showBack}
+            onClick={() => setShowBack(true)}
+          >
+            Verso
+          </button>
+        </div>
         <p className={styles.sideLabel} aria-live="polite">
           {showBack ? "Verso" : "Frente"}
         </p>
@@ -242,7 +264,7 @@ export function QrScreen() {
   const navigate = useNavigate();
   const result = useResource(getCard);
   const card = result.data;
-  const url = card && verificationUrl(card.verificationUrl);
+  const url = card && !result.error && verificationUrl(card.verificationUrl);
   return (
     <main className={qr.container}>
       <div className={qr.appWrapper}>
