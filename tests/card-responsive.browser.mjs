@@ -177,6 +177,15 @@ try {
         .count(),
       1,
     );
+    if (width <= 540) {
+      const unit = back.getByText("Fatec Itaquera — Professor Miguel Reale", {
+        exact: true,
+      });
+      assert.equal(
+        await unit.evaluate((node) => getComputedStyle(node).textTransform),
+        "uppercase",
+      );
+    }
     await capture("carteirinha-verso");
     state.blocked = true;
     const refreshed = page.waitForResponse(
