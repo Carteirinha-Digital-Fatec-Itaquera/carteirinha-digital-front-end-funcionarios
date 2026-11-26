@@ -19,7 +19,7 @@ export default function EmployeeProfile() {
   const profile = result.data;
   return (
     <PageLayout
-      title="Meus dados"
+      title="Meu Perfil"
       subtitle="Confira os dados cadastrados pela Secretaria."
       backTo="/"
       roundedHeader

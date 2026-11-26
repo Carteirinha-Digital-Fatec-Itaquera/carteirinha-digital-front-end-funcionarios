@@ -8,6 +8,7 @@ import {
   Camera,
   QrCode,
   LogOut,
+  UserRound,
 } from "lucide-react";
 import { InternetWatcher } from "../../components/internetwatcher/InternetWatcher";
 import MessageModal from "../../components/MessageModal/MessageModal";
@@ -58,8 +59,7 @@ export default function MainMenuScreen() {
             )}
           </h1>
           <p className={styles.intro}>
-            Acesse sua identificação e acompanhe suas solicitações.{" "}
-            <Link to="/meus-dados">Conferir meus dados</Link>.
+            Acesse sua identificação e acompanhe suas solicitações.
           </p>
           {photo.data && !photo.data.approved && !photo.data.pending && (
             <p>
@@ -101,11 +101,11 @@ export default function MainMenuScreen() {
               onClick={() => navigate("/carteirinha")}
             >
               <IdCard className={styles.icon} strokeWidth={1.5} />
-              <p>Minha Carteirinha</p>
+              <p>Carteirinha</p>
             </button>
 
             <button
-              className={`${styles.menuCard} ${styles.menuCard}`}
+              className={styles.menuCard}
               onClick={() => setMessageDialog("photo")}
             >
               <Camera className={styles.icon} strokeWidth={1.5} />
@@ -114,18 +114,15 @@ export default function MainMenuScreen() {
 
             <button className={styles.menuCard} onClick={() => navigate("/qr")}>
               <QrCode className={styles.icon} strokeWidth={1.5} />
-              <p>QRCode</p>
+              <p>QR Code</p>
             </button>
 
             <button
               className={styles.menuCard}
-              onClick={() => {
-                // alert('Feature de configurações do usuário')
-                navigate("/config");
-              }}
+              onClick={() => navigate("/meus-dados")}
             >
-              <Settings className={styles.icon} strokeWidth={1.5} />
-              <p>Configurações</p>
+              <UserRound className={styles.icon} strokeWidth={1.5} />
+              <p>Meu Perfil</p>
             </button>
 
             <button
@@ -147,7 +144,15 @@ export default function MainMenuScreen() {
             </button>
 
             <button
-              className={`${styles.menuCard} ${styles.centeredCard}`}
+              className={styles.menuCard}
+              onClick={() => navigate("/config")}
+            >
+              <Settings className={styles.icon} strokeWidth={1.5} />
+              <p>Configurações</p>
+            </button>
+
+            <button
+              className={styles.menuCard}
               onClick={() => navigate("/unidade")}
             >
               <Info className={styles.icon} strokeWidth={1.5} />
