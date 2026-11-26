@@ -449,8 +449,10 @@ async function authFlows(page, state) {
       await page
         .getByRole("link", { name: "Envie uma foto para análise" })
         .waitFor();
-      await page.getByRole("link", { name: "Conferir meus dados" }).click();
-      await heading(page, "Meus dados").waitFor();
+      await page
+        .getByRole("button", { name: "Meu Perfil", exact: true })
+        .click();
+      await heading(page, "Meu Perfil").waitFor();
       await page.getByText(people[0].email, { exact: true }).waitFor();
       assert.equal(await page.locator("input").count(), 0);
       await logout(page);
@@ -465,7 +467,9 @@ async function photoFlows(page, state) {
   await button(page, "Fechar aviso de foto aprovada").click();
   await notice.waitFor({ state: "hidden" });
   await page.reload();
-  await page.getByRole("button", { name: "Minha Carteirinha" }).waitFor();
+  await page
+    .getByRole("button", { name: "Carteirinha", exact: true })
+    .waitFor();
   await page.waitForLoadState("networkidle");
   assert.equal(await notice.count(), 0);
   await logout(page);
@@ -704,10 +708,16 @@ try {
     );
     await capture(page, "home-" + viewport.width);
     await page.goto(base + "/carteirinha");
-    await button(page, "Mostrar verso da carteirinha").waitFor();
+    await page
+      .getByRole("button", { name: /Mostrar verso da carteirinha/ })
+      .waitFor();
     await capture(page, "carteirinha-frente-" + viewport.width);
-    await button(page, "Mostrar verso da carteirinha").click();
-    await button(page, "Mostrar frente da carteirinha").waitFor();
+    await page
+      .getByRole("button", { name: /Mostrar verso da carteirinha/ })
+      .click();
+    await page
+      .getByRole("button", { name: /Mostrar frente da carteirinha/ })
+      .waitFor();
     await capture(page, "carteirinha-verso-" + viewport.width);
     await page.goto(base + "/qr");
     await page
@@ -720,7 +730,7 @@ try {
       .waitFor();
     await capture(page, "validacao-publica-" + viewport.width);
     for (const [path, title, name] of [
-      ["/meus-dados", "Meus dados", "meus-dados"],
+      ["/meus-dados", "Meu Perfil", "meus-dados"],
       ["/foto", "Enviar fotografia", "foto"],
       ["/config", "Configurações", "configuracoes"],
       ["/unidade", "Informações da Unidade", "unidade"],
@@ -820,7 +830,9 @@ try {
       await page.getByText(/Não foi possível conectar ao serviço/).waitFor();
       state.offline = false;
       await button(page, "Tentar novamente").click();
-      await button(page, "Mostrar verso da carteirinha").waitFor();
+      await page
+        .getByRole("button", { name: /Mostrar verso da carteirinha/ })
+        .waitFor();
       state.revoked.add(0);
       await page.goto(base + "/carteirinha");
       await heading(page, "Login").waitFor();

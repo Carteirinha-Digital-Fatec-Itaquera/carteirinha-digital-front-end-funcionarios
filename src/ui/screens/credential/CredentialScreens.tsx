@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AlertCircle, ArrowLeft, IdCard, QrCode } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -8,6 +8,7 @@ import { usePhotoUrl, useResource } from "../../../hooks";
 import { InternetWatcher } from "../../components/internetwatcher/InternetWatcher";
 import PageLayout from "../../components/page/PageLayout";
 import { Status } from "../Status";
+import CardFlip from "../../components/cardFlip/CardFlip";
 import styles from "./card.module.css";
 import qr from "../digitalStudentScan/styleQrCode.module.css";
 import validation from "../validacao/style.module.css";
@@ -61,7 +62,6 @@ export function CardScreen() {
   const navigate = useNavigate();
   const result = useResource(getCard);
   const profile = useResource(getProfile);
-  const [showBack, setShowBack] = useState(false);
   const card = result.data;
   const photoSrc = usePhotoUrl(card?.approvedPhotoUrl);
   if (!card)
@@ -85,22 +85,15 @@ export function CardScreen() {
         <InternetWatcher />
         <Status {...result} />
         <div className={styles.cardStage}>
-          <article
-            className={styles.card}
-            aria-label={
-              showBack ? "Verso da carteirinha" : "Frente da carteirinha"
-            }
-          >
-            {!showBack ? (
-              <>
+          <CardFlip
+            front={
+              <article
+                className={styles.card}
+                aria-label="Frente da carteirinha"
+              >
                 <div className={styles.institutionalHeader}>
                   <img src={logoFatecPreto} alt="Fatec Itaquera" />
                   <img src={logoCps} alt="Centro Paula Souza" />
-                  <p>
-                    Governo do Estado
-                    <br />
-                    <strong>de São Paulo</strong>
-                  </p>
                 </div>
                 <div className={styles.frontBody}>
                   <dl className={styles.frontData}>
@@ -141,9 +134,13 @@ export function CardScreen() {
                     />
                   </div>
                 </div>
-              </>
-            ) : (
-              <>
+              </article>
+            }
+            back={
+              <article
+                className={styles.card}
+                aria-label="Verso da carteirinha"
+              >
                 <div className={styles.backBand}>
                   <span>Identificação funcional</span>
                 </div>
@@ -166,12 +163,10 @@ export function CardScreen() {
                         )}
                       </dd>
                     </div>
-                    {profile.data?.rg && (
-                      <div>
-                        <dt>RG</dt>
-                        <dd>{profile.data.rg}</dd>
-                      </div>
-                    )}
+                    <div>
+                      <dt>RG:</dt>
+                      <dd>{profile.data?.rg?.trim() || "Não informado"}</dd>
+                    </div>
                   </dl>
                   <div className={styles.backDetails}>
                     <div>
@@ -181,11 +176,6 @@ export function CardScreen() {
                         carteirinha para identificação e utilize o QR Code para
                         consultar sua validade.
                       </p>
-                      <span className={styles.cardStatus}>
-                        {card.credential.valid
-                          ? "Carteirinha válida"
-                          : reason(card.credential.reasonCode)}
-                      </span>
                     </div>
                     <div className={styles.qrColumn}>
                       <img src={logoFatecPreto} alt="Fatec Itaquera" />
@@ -207,35 +197,10 @@ export function CardScreen() {
                     </div>
                   </div>
                 </div>
-              </>
-            )}
-          </article>
+              </article>
+            }
+          />
         </div>
-        <div
-          className={styles.sideControl}
-          role="group"
-          aria-label="Lado da carteirinha"
-        >
-          <button
-            type="button"
-            aria-label="Mostrar frente da carteirinha"
-            aria-pressed={!showBack}
-            onClick={() => setShowBack(false)}
-          >
-            Frente
-          </button>
-          <button
-            type="button"
-            aria-label="Mostrar verso da carteirinha"
-            aria-pressed={showBack}
-            onClick={() => setShowBack(true)}
-          >
-            Verso
-          </button>
-        </div>
-        <p className={styles.sideLabel} aria-live="polite">
-          {showBack ? "Verso" : "Frente"}
-        </p>
         {!card.credential.valid && (
           <p role="status" className={styles.availability}>
             {reason(card.credential.reasonCode)}

@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test:browser": "node tests/portal.browser.mjs",
     "test:cache": "node --test tests/cache.test.mjs",
-    "test:ux": "node tests/ux.browser.mjs"
+    "test:ux": "node tests/ux.browser.mjs",
+    "test:components": "node tests/flip.component.browser.mjs",
+    "test:home-flip": "node tests/home-flip.browser.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.8.0",

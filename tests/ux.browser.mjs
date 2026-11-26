@@ -208,9 +208,12 @@ try {
       });
     const before = state.calls.length;
     const start = Date.now();
-    await page.getByRole("link", { name: "Conferir meus dados" }).click();
+    await page.getByRole("button", { name: "Meu Perfil", exact: true }).click();
     await page
-      .getByRole("heading", { name: "Meus dados", exact: true })
+      .getByRole("heading", {
+        name: baseline ? "Meus dados" : "Meu Perfil",
+        exact: true,
+      })
       .waitFor();
     await page
       .getByRole("link", { name: "Voltar ao menu", exact: true })
@@ -261,7 +264,9 @@ try {
       "Sem recarregar perfil/foto/blob numa navegação recente",
     );
     await capture("home-estavel");
-    await page.getByRole("button", { name: "Minha Carteirinha" }).click();
+    await page
+      .getByRole("button", { name: "Carteirinha", exact: true })
+      .click();
     await page.getByText("NOME:", { exact: true }).waitFor();
     const front = page.getByRole("article", { name: "Frente da carteirinha" });
     assert.match(await front.innerText(), /JOÃO SILVA/);
@@ -274,12 +279,12 @@ try {
     );
     await capture("carteirinha-frente");
     await page
-      .getByRole("button", { name: "Mostrar verso da carteirinha" })
+      .getByRole("button", { name: /Mostrar verso da carteirinha/ })
       .click();
     await page.getByRole("article", { name: "Verso da carteirinha" }).waitFor();
     assert.equal(
       await page
-        .getByRole("button", { name: "Mostrar verso da carteirinha" })
+        .getByRole("button", { name: /Mostrar frente da carteirinha/ })
         .getAttribute("aria-pressed"),
       "true",
     );
@@ -291,8 +296,11 @@ try {
       1,
     );
     await capture("carteirinha-verso");
+    await page.waitForFunction(
+      () => !document.querySelector('[data-turning="true"]'),
+    );
     await page
-      .getByRole("button", { name: "Mostrar frente da carteirinha" })
+      .getByRole("button", { name: /Mostrar frente da carteirinha/ })
       .focus();
     await page.keyboard.press("Enter");
     await front.waitFor();
@@ -357,7 +365,7 @@ try {
     await page
       .getByRole("button", { name: "Fechar aviso de fotografia rejeitada" })
       .click();
-    await page.getByRole("link", { name: "Conferir meus dados" }).click();
+    await page.getByRole("button", { name: "Meu Perfil", exact: true }).click();
     await page
       .getByRole("link", { name: "Voltar ao menu", exact: true })
       .click();
@@ -401,9 +409,11 @@ try {
     };
     await refresh();
     await page.getByRole("heading", { name: "Foto em análise" }).waitFor();
-    await page.getByRole("button", { name: "Minha Carteirinha" }).click();
     await page
-      .getByRole("button", { name: "Mostrar verso da carteirinha" })
+      .getByRole("button", { name: "Carteirinha", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: /Mostrar verso da carteirinha/ })
       .click();
     assert.equal(
       await page
@@ -426,7 +436,9 @@ try {
     );
     assert.equal(await page.locator('img[src^="blob:"]').count(), 1);
     await capture("home-api-indisponivel");
-    await page.getByRole("button", { name: "Minha Carteirinha" }).click();
+    await page
+      .getByRole("button", { name: "Carteirinha", exact: true })
+      .click();
     await page
       .getByRole("heading", { name: "Carteirinha", exact: true })
       .waitFor();
@@ -444,7 +456,7 @@ try {
     state.fail = false;
     await page.getByRole("button", { name: "Tentar novamente" }).click();
     await page
-      .getByRole("button", { name: "Mostrar verso da carteirinha" })
+      .getByRole("button", { name: /Mostrar verso da carteirinha/ })
       .waitFor();
     await page.getByRole("button", { name: "Voltar ao menu" }).click();
     await page.getByRole("button", { name: "Deslogar" }).click();
